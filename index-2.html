@@ -1,0 +1,1449 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="description" content="Extractor.app — Convierte facturas PDF en Excel en segundos con Inteligencia Artificial. Ideal para empresas de importación y exportación.">
+<title>Extractor.app · Facturas PDF → Excel en segundos</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=DM+Mono:wght@400;500&family=DM+Sans:ital,wght@0,300;0,400;0,500;0,600;1,300&display=swap" rel="stylesheet">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.4.120/pdf.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+<style>
+/* ── TOKENS ──────────────────────────────────────────────────────────── */
+:root {
+  --bg:        #0b0d12;
+  --surface:   #12151e;
+  --surface2:  #181c28;
+  --border:    #222738;
+  --border2:   #2e3548;
+  --accent:    #4f8ef7;
+  --accent2:   #2563eb;
+  --accent3:   #1d4ed8;
+  --success:   #22c55e;
+  --warning:   #f59e0b;
+  --danger:    #ef4444;
+  --text:      #e9edf8;
+  --text2:     #7c88a2;
+  --text3:     #404860;
+  --mono:      'DM Mono', monospace;
+  --sans:      'DM Sans', sans-serif;
+  --radius:    10px;
+  --radius-lg: 16px;
+}
+
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+html { scroll-behavior: smooth; }
+
+body {
+  background: var(--bg);
+  color: var(--text);
+  font-family: var(--sans);
+  min-height: 100vh;
+  overflow-x: hidden;
+}
+
+/* subtle dot grid */
+body::before {
+  content: '';
+  position: fixed; inset: 0;
+  background-image: radial-gradient(circle, #ffffff08 1px, transparent 1px);
+  background-size: 28px 28px;
+  pointer-events: none; z-index: 0;
+}
+
+/* ── LAYOUT ──────────────────────────────────────────────────────────── */
+.page { position: relative; z-index: 1; }
+
+.container {
+  max-width: 1040px;
+  margin: 0 auto;
+  padding: 0 1.5rem;
+}
+
+section { padding: 5rem 0; }
+
+/* ── NAV ─────────────────────────────────────────────────────────────── */
+nav {
+  position: sticky; top: 0; z-index: 100;
+  border-bottom: 1px solid var(--border);
+  background: rgba(11,13,18,0.85);
+  backdrop-filter: blur(12px);
+}
+
+.nav-inner {
+  max-width: 1040px; margin: 0 auto;
+  padding: 0 1.5rem;
+  height: 60px;
+  display: flex; align-items: center; justify-content: space-between;
+}
+
+.nav-logo {
+  display: flex; align-items: center; gap: 10px;
+  text-decoration: none;
+}
+
+.nav-logo-mark {
+  width: 30px; height: 30px;
+  background: linear-gradient(135deg, var(--accent2), var(--accent));
+  border-radius: 7px;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 15px;
+}
+
+.nav-logo-text {
+  font-size: 1rem; font-weight: 600;
+  color: var(--text);
+  letter-spacing: -0.02em;
+}
+
+.nav-logo-text span { color: var(--accent); }
+
+.nav-links {
+  display: flex; align-items: center; gap: 0.25rem;
+  list-style: none;
+}
+
+.nav-links a {
+  color: var(--text2); text-decoration: none;
+  font-size: 0.875rem; padding: 6px 14px;
+  border-radius: var(--radius);
+  transition: all 0.15s;
+}
+
+.nav-links a:hover { color: var(--text); background: var(--surface2); }
+
+.nav-cta {
+  background: var(--accent2) !important;
+  color: #fff !important;
+  font-weight: 500;
+}
+
+.nav-cta:hover { background: var(--accent3) !important; }
+
+/* ── HERO ────────────────────────────────────────────────────────────── */
+.hero {
+  padding: 7rem 0 5rem;
+  text-align: center;
+  position: relative;
+}
+
+/* glow */
+.hero::before {
+  content: '';
+  position: absolute;
+  top: -60px; left: 50%; transform: translateX(-50%);
+  width: 600px; height: 400px;
+  background: radial-gradient(ellipse, rgba(37,99,235,0.18) 0%, transparent 70%);
+  pointer-events: none;
+}
+
+.hero-badge {
+  display: inline-flex; align-items: center; gap: 6px;
+  background: rgba(37,99,235,0.12);
+  border: 1px solid rgba(37,99,235,0.3);
+  border-radius: 99px;
+  padding: 5px 14px;
+  font-size: 0.75rem;
+  font-family: var(--mono);
+  color: var(--accent);
+  margin-bottom: 1.75rem;
+  letter-spacing: 0.04em;
+}
+
+.hero-badge::before { content: '●'; font-size: 8px; }
+
+h1 {
+  font-size: clamp(2.25rem, 5vw, 3.5rem);
+  font-weight: 600;
+  line-height: 1.1;
+  letter-spacing: -0.03em;
+  margin-bottom: 1.25rem;
+  max-width: 700px;
+  margin-left: auto; margin-right: auto;
+}
+
+h1 .highlight {
+  background: linear-gradient(135deg, var(--accent), #818cf8);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+.hero-sub {
+  font-size: 1.1rem;
+  color: var(--text2);
+  max-width: 540px;
+  margin: 0 auto 2.5rem;
+  line-height: 1.7;
+  font-weight: 300;
+}
+
+.hero-actions {
+  display: flex; gap: 12px;
+  justify-content: center; flex-wrap: wrap;
+  margin-bottom: 3.5rem;
+}
+
+.btn {
+  display: inline-flex; align-items: center; gap: 8px;
+  padding: 12px 24px;
+  border-radius: var(--radius);
+  font-family: var(--sans);
+  font-size: 0.9rem; font-weight: 500;
+  cursor: pointer; text-decoration: none;
+  border: 1px solid transparent;
+  transition: all 0.15s;
+  white-space: nowrap;
+}
+
+.btn-primary {
+  background: var(--accent2); color: #fff;
+  border-color: var(--accent2);
+}
+
+.btn-primary:hover { background: var(--accent3); border-color: var(--accent3); transform: translateY(-1px); box-shadow: 0 8px 24px rgba(37,99,235,0.3); }
+
+.btn-outline {
+  background: transparent; color: var(--text);
+  border-color: var(--border2);
+}
+
+.btn-outline:hover { background: var(--surface2); border-color: var(--border2); }
+
+/* hero stats */
+.hero-stats {
+  display: flex; justify-content: center; gap: 2.5rem;
+  flex-wrap: wrap;
+}
+
+.hero-stat { text-align: center; }
+
+.hero-stat-num {
+  font-family: var(--mono);
+  font-size: 1.5rem; font-weight: 500;
+  color: var(--text);
+  display: block;
+}
+
+.hero-stat-label {
+  font-size: 0.75rem; color: var(--text3);
+  text-transform: uppercase; letter-spacing: 0.08em;
+  font-family: var(--mono);
+}
+
+/* ── HOW IT WORKS ────────────────────────────────────────────────────── */
+#como-funciona { border-top: 1px solid var(--border); }
+
+.section-eyebrow {
+  font-family: var(--mono);
+  font-size: 0.7rem; color: var(--accent);
+  text-transform: uppercase; letter-spacing: 0.12em;
+  margin-bottom: 0.75rem;
+}
+
+h2 {
+  font-size: clamp(1.6rem, 3vw, 2.25rem);
+  font-weight: 600; letter-spacing: -0.025em;
+  margin-bottom: 1rem;
+}
+
+.section-sub {
+  color: var(--text2); font-size: 1rem;
+  max-width: 480px; line-height: 1.7;
+  margin-bottom: 3rem; font-weight: 300;
+}
+
+.steps {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 1.5rem;
+}
+
+.step {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+  padding: 1.75rem 1.5rem;
+  position: relative;
+  transition: border-color 0.2s;
+}
+
+.step:hover { border-color: var(--border2); }
+
+.step-num {
+  font-family: var(--mono);
+  font-size: 0.7rem; color: var(--text3);
+  letter-spacing: 0.1em;
+  margin-bottom: 1rem;
+}
+
+.step-icon {
+  font-size: 1.75rem; margin-bottom: 0.875rem; display: block;
+}
+
+.step h3 {
+  font-size: 0.95rem; font-weight: 500;
+  margin-bottom: 0.5rem;
+}
+
+.step p {
+  font-size: 0.825rem; color: var(--text2);
+  line-height: 1.6;
+}
+
+/* ── FEATURES ────────────────────────────────────────────────────────── */
+#caracteristicas { border-top: 1px solid var(--border); }
+
+.features {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+  gap: 1.25rem;
+}
+
+.feature {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+  padding: 1.5rem;
+  display: flex; gap: 1rem;
+  transition: all 0.2s;
+}
+
+.feature:hover { border-color: rgba(37,99,235,0.3); background: var(--surface2); }
+
+.feature-icon {
+  width: 40px; height: 40px; flex-shrink: 0;
+  background: rgba(37,99,235,0.12);
+  border-radius: 9px;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 1.1rem;
+}
+
+.feature h3 { font-size: 0.9rem; font-weight: 500; margin-bottom: 4px; }
+.feature p  { font-size: 0.8rem; color: var(--text2); line-height: 1.6; }
+
+/* ── PRICING ─────────────────────────────────────────────────────────── */
+#precios { border-top: 1px solid var(--border); }
+
+.plans {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+  gap: 1.25rem;
+  max-width: 900px;
+}
+
+.plan {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+  padding: 2rem 1.75rem;
+  display: flex; flex-direction: column;
+  transition: border-color 0.2s;
+}
+
+.plan:hover { border-color: var(--border2); }
+
+.plan.featured {
+  border-color: var(--accent2);
+  background: linear-gradient(180deg, rgba(37,99,235,0.08) 0%, var(--surface) 100%);
+  position: relative;
+}
+
+.plan-badge {
+  position: absolute; top: -12px; left: 50%; transform: translateX(-50%);
+  background: var(--accent2); color: #fff;
+  font-size: 0.7rem; font-weight: 600;
+  padding: 3px 14px; border-radius: 99px;
+  white-space: nowrap; font-family: var(--mono);
+  letter-spacing: 0.06em;
+}
+
+.plan-name {
+  font-family: var(--mono);
+  font-size: 0.7rem; color: var(--text2);
+  text-transform: uppercase; letter-spacing: 0.1em;
+  margin-bottom: 0.75rem;
+}
+
+.plan-price {
+  font-size: 2.5rem; font-weight: 600;
+  letter-spacing: -0.04em;
+  margin-bottom: 0.25rem;
+}
+
+.plan-price span { font-size: 1rem; font-weight: 400; color: var(--text2); }
+
+.plan-pages {
+  font-family: var(--mono);
+  font-size: 0.8rem; color: var(--accent);
+  margin-bottom: 1.5rem;
+}
+
+.plan-features {
+  list-style: none;
+  margin-bottom: 2rem; flex: 1;
+}
+
+.plan-features li {
+  font-size: 0.85rem; color: var(--text2);
+  padding: 6px 0;
+  border-bottom: 1px solid var(--border);
+  display: flex; align-items: center; gap: 8px;
+}
+
+.plan-features li:last-child { border-bottom: none; }
+.plan-features li::before { content: '✓'; color: var(--success); font-weight: 600; flex-shrink: 0; }
+
+.plan-btn {
+  display: block; width: 100%;
+  padding: 12px;
+  border-radius: var(--radius);
+  text-align: center;
+  font-size: 0.9rem; font-weight: 500;
+  cursor: pointer; text-decoration: none;
+  transition: all 0.15s;
+  border: 1px solid var(--border2);
+  background: transparent; color: var(--text);
+  font-family: var(--sans);
+}
+
+.plan-btn:hover { background: var(--surface2); }
+.plan-btn.primary { background: var(--accent2); border-color: var(--accent2); color: #fff; }
+.plan-btn.primary:hover { background: var(--accent3); }
+
+.pricing-note {
+  margin-top: 1.5rem;
+  font-size: 0.8rem; color: var(--text3);
+  font-family: var(--mono);
+  display: flex; align-items: center; gap: 8px;
+}
+
+.pricing-note::before { content: '🔒'; font-size: 12px; }
+
+/* ── APP SECTION ─────────────────────────────────────────────────────── */
+#app { border-top: 1px solid var(--border); }
+
+/* API Key */
+.api-bar {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+  padding: 1.25rem 1.5rem;
+  display: flex; gap: 12px; align-items: flex-end;
+  margin-bottom: 1.25rem;
+}
+
+.api-bar .field { flex: 1; }
+
+label {
+  display: block;
+  font-size: 0.7rem; font-weight: 500;
+  color: var(--text3);
+  text-transform: uppercase; letter-spacing: 0.08em;
+  margin-bottom: 6px; font-family: var(--mono);
+}
+
+input[type="password"], input[type="text"], select {
+  width: 100%;
+  background: var(--bg);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  padding: 10px 14px;
+  color: var(--text);
+  font-family: var(--mono); font-size: 0.875rem;
+  outline: none; transition: border-color 0.15s;
+}
+
+input:focus, select:focus { border-color: var(--accent); }
+select option { background: var(--surface); }
+
+/* config grid */
+.config-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 1rem; margin-bottom: 1.25rem;
+}
+
+.config-card {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+  padding: 1rem 1.25rem;
+}
+
+/* custom product input */
+#customWrap {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+  padding: 1rem 1.25rem;
+  margin-bottom: 1.25rem;
+  display: none;
+}
+
+/* drop zone */
+.drop-zone {
+  background: var(--surface);
+  border: 2px dashed var(--border2);
+  border-radius: var(--radius-lg);
+  padding: 3rem 2rem;
+  text-align: center; cursor: pointer;
+  transition: all 0.2s;
+  margin-bottom: 1.25rem;
+}
+
+.drop-zone:hover, .drop-zone.dragover {
+  border-color: var(--accent);
+  background: rgba(79,142,247,0.04);
+}
+
+.drop-icon { font-size: 2.25rem; margin-bottom: 0.875rem; opacity: 0.6; }
+.drop-title { font-size: 0.95rem; font-weight: 500; margin-bottom: 0.25rem; }
+.drop-hint  { font-size: 0.78rem; color: var(--text3); font-family: var(--mono); }
+
+#fileInput { display: none; }
+
+/* file list */
+.file-list {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+  overflow: hidden; margin-bottom: 1.25rem;
+  display: none;
+}
+
+.file-list-hdr {
+  padding: 0.75rem 1.25rem;
+  border-bottom: 1px solid var(--border);
+  display: flex; justify-content: space-between; align-items: center;
+  background: var(--surface2);
+  font-family: var(--mono); font-size: 0.75rem; color: var(--text2);
+}
+
+.file-item {
+  display: flex; align-items: center; gap: 12px;
+  padding: 0.625rem 1.25rem;
+  border-bottom: 1px solid var(--border);
+  font-size: 0.82rem; transition: background 0.1s;
+}
+
+.file-item:last-child { border-bottom: none; }
+.file-item:hover { background: var(--surface2); }
+
+.file-num { font-family: var(--mono); font-size: 0.7rem; color: var(--text3); min-width: 22px; text-align: right; }
+.file-name { flex: 1; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font-family: var(--mono); font-size: 0.78rem; }
+.file-sz   { font-family: var(--mono); font-size: 0.7rem; color: var(--text3); }
+
+.badge { font-size: 0.68rem; padding: 2px 8px; border-radius: 99px; font-family: var(--mono); white-space: nowrap; }
+.badge-pending    { background: var(--surface2); color: var(--text3); border: 1px solid var(--border); }
+.badge-reading    { background: rgba(245,158,11,.15); color: var(--warning); border: 1px solid rgba(245,158,11,.3); }
+.badge-extracting { background: rgba(79,142,247,.15); color: var(--accent); border: 1px solid rgba(79,142,247,.3); }
+.badge-done       { background: rgba(34,197,94,.15);  color: var(--success); border: 1px solid rgba(34,197,94,.3); }
+.badge-error      { background: rgba(239,68,68,.15);  color: var(--danger);  border: 1px solid rgba(239,68,68,.3); }
+
+/* buttons */
+.btn-row { display: flex; gap: 10px; margin-bottom: 1.25rem; flex-wrap: wrap; }
+
+button {
+  padding: 10px 20px; border-radius: 8px;
+  border: 1px solid var(--border2); cursor: pointer;
+  font-family: var(--sans); font-size: 0.875rem; font-weight: 500;
+  transition: all 0.15s;
+}
+
+.btn-primary-sm { background: var(--accent2); border-color: var(--accent2); color: #fff; }
+.btn-primary-sm:hover:not(:disabled) { background: var(--accent3); }
+.btn-primary-sm:disabled { opacity: 0.4; cursor: not-allowed; }
+.btn-ghost { background: transparent; color: var(--text2); }
+.btn-ghost:hover { background: var(--surface2); color: var(--text); }
+.btn-dl { background: rgba(34,197,94,.12); border-color: rgba(34,197,94,.35); color: var(--success); }
+.btn-dl:hover { background: rgba(34,197,94,.2); }
+
+/* progress */
+.prog-wrap {
+  background: var(--surface); border: 1px solid var(--border);
+  border-radius: var(--radius-lg); padding: 1.25rem 1.5rem;
+  margin-bottom: 1.25rem; display: none;
+}
+
+.prog-label {
+  display: flex; justify-content: space-between;
+  font-size: 0.78rem; color: var(--text2); font-family: var(--mono);
+  margin-bottom: 8px;
+}
+
+.prog-track { background: var(--border); border-radius: 99px; height: 3px; overflow: hidden; }
+.prog-fill  { height: 3px; background: linear-gradient(90deg, var(--accent2), var(--accent)); border-radius: 99px; transition: width .4s ease; width: 0%; }
+
+/* stats */
+.stats-grid {
+  display: grid; grid-template-columns: repeat(4,1fr);
+  gap: 1rem; margin-bottom: 1.25rem; display: none;
+}
+
+.stat-card {
+  background: var(--surface); border: 1px solid var(--border);
+  border-radius: var(--radius); padding: 1rem 1.25rem;
+}
+
+.stat-lbl { font-family: var(--mono); font-size: 0.68rem; color: var(--text3); text-transform: uppercase; letter-spacing: .06em; margin-bottom: 4px; }
+.stat-val { font-family: var(--mono); font-size: 1.15rem; font-weight: 500; }
+.stat-val.c-accent { color: var(--accent); }
+.stat-val.c-green  { color: var(--success); }
+
+/* results table */
+.results-wrap {
+  background: var(--surface); border: 1px solid var(--border);
+  border-radius: var(--radius-lg); overflow: hidden;
+  margin-bottom: 1.25rem; display: none;
+}
+
+.results-hdr {
+  padding: 0.875rem 1.25rem; border-bottom: 1px solid var(--border);
+  display: flex; justify-content: space-between; align-items: center;
+  background: var(--surface2);
+  font-size: 0.85rem; font-weight: 500;
+}
+
+.results-hdr span:last-child { font-family: var(--mono); font-size: 0.75rem; color: var(--text2); }
+
+.tbl-scroll { overflow-x: auto; max-height: 400px; overflow-y: auto; }
+
+table { width: 100%; border-collapse: collapse; font-size: 0.78rem; }
+thead { position: sticky; top: 0; z-index: 2; }
+thead th {
+  background: var(--surface2); padding: 9px 14px;
+  text-align: left; font-family: var(--mono); font-size: 0.68rem;
+  color: var(--text3); text-transform: uppercase; letter-spacing: .06em;
+  border-bottom: 1px solid var(--border); white-space: nowrap;
+}
+tbody tr { border-bottom: 1px solid var(--border); transition: background .1s; }
+tbody tr:last-child { border-bottom: none; }
+tbody tr:hover { background: var(--surface2); }
+tbody td { padding: 8px 14px; font-family: var(--mono); white-space: nowrap; }
+
+.td-fact  { color: var(--text2); max-width: 150px; overflow: hidden; text-overflow: ellipsis; }
+.td-model { color: var(--accent); font-weight: 500; }
+.td-tipo  { color: var(--text2); }
+.td-r     { text-align: right; }
+.td-total { text-align: right; color: var(--success); font-weight: 500; }
+
+/* log */
+.log-box {
+  background: var(--bg); border: 1px solid var(--border);
+  border-radius: var(--radius); padding: 1rem;
+  font-family: var(--mono); font-size: 0.73rem; color: var(--text2);
+  max-height: 120px; overflow-y: auto; display: none;
+  margin-bottom: 1.25rem;
+}
+
+.ll { padding: 2px 0; }
+.ll.info { color: var(--accent); }
+.ll.ok   { color: var(--success); }
+.ll.warn { color: var(--warning); }
+.ll.err  { color: var(--danger); }
+
+/* ── FOOTER ──────────────────────────────────────────────────────────── */
+footer {
+  border-top: 1px solid var(--border);
+  padding: 2.5rem 0;
+  text-align: center;
+}
+
+.footer-logo { font-size: 1rem; font-weight: 600; margin-bottom: 0.5rem; letter-spacing: -0.02em; }
+.footer-logo span { color: var(--accent); }
+
+.footer-links {
+  display: flex; justify-content: center; gap: 1.5rem;
+  list-style: none; margin: 1rem 0;
+}
+
+.footer-links a { color: var(--text3); text-decoration: none; font-size: 0.8rem; transition: color .15s; }
+.footer-links a:hover { color: var(--text2); }
+
+.footer-copy { font-size: 0.75rem; color: var(--text3); font-family: var(--mono); }
+
+/* ── SCROLLBAR ───────────────────────────────────────────────────────── */
+::-webkit-scrollbar { width: 5px; height: 5px; }
+::-webkit-scrollbar-track { background: var(--surface); }
+::-webkit-scrollbar-thumb { background: var(--border2); border-radius: 3px; }
+
+/* ── RESPONSIVE ──────────────────────────────────────────────────────── */
+@media (max-width: 700px) {
+  .config-grid { grid-template-columns: 1fr; }
+  .stats-grid  { grid-template-columns: 1fr 1fr; }
+  .plans       { grid-template-columns: 1fr; }
+  .nav-links   { display: none; }
+  .api-bar     { flex-direction: column; }
+  .hero-stats  { gap: 1.5rem; }
+}
+</style>
+</head>
+<body class="page">
+
+<!-- ── NAV ──────────────────────────────────────────────────────────────── -->
+
+<!-- LANG SWITCHER -->
+<div class="lang-bar">
+  <button class="lang-btn active" onclick="setLang('es')" id="lb-es">ES</button>
+  <button class="lang-btn" onclick="setLang('en')" id="lb-en">EN</button>
+  <!-- VERCEL: add FR and ZH buttons here -->
+</div>
+
+<nav>
+  <div class="nav-inner">
+    <a href="#" class="nav-logo">
+      <div class="nav-logo-mark">⚡</div>
+      <span class="nav-logo-text">Extractor<span>.app</span></span>
+    </a>
+    <ul class="nav-links">
+      <li><a href="#como-funciona" data-i18n="nav.how">Cómo funciona</a></li>
+      <li><a href="#caracteristicas" data-i18n="nav.features">Características</a></li>
+      <li><a href="#precios" data-i18n="nav.pricing">Precios</a></li>
+      <li><a href="#app" class="nav-cta" data-i18n="nav.cta">Usar ahora →</a></li>
+    </ul>
+  </div>
+</nav>
+
+<!-- ── HERO ──────────────────────────────────────────────────────────────── -->
+<section class="hero">
+  <div class="container">
+    <div class="hero-badge" data-i18n="hero.badge">Powered by Claudia · Semper intentus</div>
+    <h1>Facturas PDF → Excel<br><span class="highlight">en segundos</span></h1>
+    <p class="hero-sub" data-i18n="hero.sub">
+      Sube tus facturas, elige qué extraer y descarga un Excel perfectamente estructurado.
+      Sin configuraciones, sin plantillas, sin errores manuales.
+    </p>
+    <div class="hero-actions">
+      <a href="#app" class="btn btn-primary" data-i18n="hero.cta1">⚡ Empezar ahora</a>
+      <a href="#como-funciona" class="btn btn-outline" data-i18n="hero.cta2">Ver cómo funciona</a>
+    </div>
+    <div class="hero-stats">
+      <div class="hero-stat">
+        <span class="hero-stat-num">99%</span>
+        <span class="hero-stat-label">precisión</span>
+      </div>
+      <div class="hero-stat">
+        <span class="hero-stat-num">&lt;30s</span>
+        <span class="hero-stat-label">por factura</span>
+      </div>
+      <div class="hero-stat">
+        <span class="hero-stat-num">∞</span>
+        <span class="hero-stat-label">tipos de producto</span>
+      </div>
+      <div class="hero-stat">
+        <span class="hero-stat-num">0</span>
+        <span class="hero-stat-label">instalación</span>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ── HOW IT WORKS ───────────────────────────────────────────────────────── -->
+<section id="como-funciona">
+  <div class="container">
+    <p class="section-eyebrow" data-i18n="how.eyebrow">Proceso</p>
+    <h2>Tres pasos, todo resuelto</h2>
+    <p class="section-sub">Sin curva de aprendizaje. Sin plantillas que configurar. Solo sube, extrae y descarga.</p>
+    <div class="steps">
+      <div class="step">
+        <div class="step-num">01</div>
+        <span class="step-icon">📂</span>
+        <h3>Sube tus PDFs</h3>
+        <p>Arrastra todas tus facturas de una vez, sin límite de archivos ni de páginas por sesión.</p>
+      </div>
+      <div class="step">
+        <div class="step-num">02</div>
+        <span class="step-icon">🧠</span>
+        <h3>Claudia lee y entiende</h3>
+        <p>La IA lee cada factura, identifica los productos que buscas y extrae modelo, cantidad y precio.</p>
+      </div>
+      <div class="step">
+        <div class="step-num">03</div>
+        <span class="step-icon">📊</span>
+        <h3>Descarga el Excel</h3>
+        <p>Obtienes un Excel con detalle por línea, resumen por factura y resumen por tipo de producto.</p>
+      </div>
+      <div class="step">
+        <div class="step-num">04</div>
+        <span class="step-icon">🔄</span>
+        <h3>Repite sin límites</h3>
+        <p>Compra créditos de páginas y procesa todas las facturas que necesites, cuando quieras.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ── FEATURES ───────────────────────────────────────────────────────────── -->
+<section id="caracteristicas">
+  <div class="container">
+    <p class="section-eyebrow" data-i18n="feat.eyebrow">Características</p>
+    <h2>Todo lo que necesitas</h2>
+    <p class="section-sub">Diseñado para empresas de importación, distribución y comercio internacional.</p>
+    <div class="features">
+      <div class="feature">
+        <div class="feature-icon">🗂️</div>
+        <div>
+          <h3>Cualquier tipo de producto</h3>
+          <p>Filtros, repuestos de refrigeración, piezas de vehículos, componentes industriales o todo el contenido de la factura.</p>
+        </div>
+      </div>
+      <div class="feature">
+        <div class="feature-icon">📅</div>
+        <div>
+          <h3>Años 2022 – 2026</h3>
+          <p>Procesa facturas de cualquier ejercicio fiscal. El Excel se etiqueta y colorea por año automáticamente.</p>
+        </div>
+      </div>
+      <div class="feature">
+        <div class="feature-icon">⚡</div>
+        <div>
+          <h3>Procesamiento en paralelo</h3>
+          <p>Sube decenas de facturas a la vez. La app procesa cada una secuencialmente mostrando el progreso en tiempo real.</p>
+        </div>
+      </div>
+      <div class="feature">
+        <div class="feature-icon">🔒</div>
+        <div>
+          <h3>Privacidad total</h3>
+          <p>Los PDFs nunca salen de tu navegador. Solo el texto extraído se envía a Claudia para su análisis.</p>
+        </div>
+      </div>
+      <div class="feature">
+        <div class="feature-icon">📥</div>
+        <div>
+          <h3>Excel profesional</h3>
+          <p>Tres hojas: detalle de líneas, resumen por factura y resumen por tipo de producto. Colores por categoría incluidos.</p>
+        </div>
+      </div>
+      <div class="feature">
+        <div class="feature-icon">🌍</div>
+        <div>
+          <h3>Facturas internacionales</h3>
+          <p>Funciona con facturas en español, inglés y francés. Ideal para operaciones en África occidental y central.</p>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ── PRICING ────────────────────────────────────────────────────────────── -->
+<section id="precios">
+  <div class="container">
+    <p class="section-eyebrow" data-i18n="price.eyebrow">Precios</p>
+    <h2>Paga solo por lo que usas</h2>
+    <p class="section-sub">Sin suscripción mensual. Compra créditos de páginas y úsalos cuando los necesites. No caducan.</p>
+    <div class="plans">
+
+      <div class="plan">
+        <div class="plan-name">Starter</div>
+        <div class="plan-price">9<span> €</span></div>
+        <div class="plan-pages">50 páginas de factura</div>
+        <ul class="plan-features">
+          <li>~10–15 facturas estándar</li>
+          <li>Todos los tipos de producto</li>
+          <li>Descarga Excel completo</li>
+          <li>Soporte por email</li>
+        </ul>
+        <!-- Sustituye el href por tu link de SumUp para 9€ -->
+        <a href="/cdn-cgi/l/email-protection#442c2b282504213c30362527302b366a2534347b3731262e21273079072b2934362561767471746176743487e5232d2a2537" class="plan-btn">
+          Comprar · 9 €
+        </a>
+      </div>
+
+      <div class="plan featured">
+        <div class="plan-badge">MÁS POPULAR</div>
+        <div class="plan-name">Pro</div>
+        <div class="plan-price">19<span> €</span></div>
+        <div class="plan-pages">100 páginas de factura</div>
+        <ul class="plan-features">
+          <li>~25–35 facturas estándar</li>
+          <li>Todos los tipos de producto</li>
+          <li>Descarga Excel completo</li>
+          <li>Soporte prioritario</li>
+        </ul>
+        <!-- Sustituye el href por tu link de SumUp para 19€ -->
+        <a href="/cdn-cgi/l/email-protection#90f8fffcf1d0f5e8e4e2f1f3e4ffe2bef1e0e0afe3e5f2faf5f3e4add3fffde0e2f1b5a2a0a1a0a0b5a2a0e05331f7f9fef1e3" class="plan-btn primary">
+          Comprar · 19 €
+        </a>
+      </div>
+
+      <div class="plan">
+        <div class="plan-name">Business</div>
+        <div class="plan-price">39<span> €</span></div>
+        <div class="plan-pages">300 páginas de factura</div>
+        <ul class="plan-features">
+          <li>~80–100 facturas estándar</li>
+          <li>Todos los tipos de producto</li>
+          <li>Descarga Excel completo</li>
+          <li>Soporte prioritario + llamada</li>
+        </ul>
+        <!-- Sustituye el href por tu link de SumUp para 39€ -->
+        <a href="/cdn-cgi/l/email-protection#f79f989b96b7928f83859694839885d9968787c88482959d929483cab4989a878596d2c5c7c4c7c7d2c5c7873456909e999684" class="plan-btn">
+          Comprar · 39 €
+        </a>
+      </div>
+
+    </div>
+    <p class="pricing-note">Pago 100% seguro · Los créditos no caducan · Factura disponible · IVA no incluido</p>
+  </div>
+</section>
+
+<!-- ── APP ────────────────────────────────────────────────────────────────── -->
+<section id="app">
+  <div class="container">
+    <p class="section-eyebrow" data-i18n="app.eyebrow">Herramienta</p>
+    <h2 data-i18n="app.title">Empieza a extraer</h2>
+    <p class="section-sub" style="margin-bottom:2rem">
+      Necesitas una API key de Anthropic. Si compraste créditos y aún no la tienes,
+      <a href="/cdn-cgi/l/email-protection#0c6463606d4c6974787e6d6f78637e226d7c7c" style="color:var(--accent)">escríbenos</a> y te ayudamos.
+    </p>
+
+    <!-- API Key -->
+    <div class="api-bar">
+      <div class="field">
+        <label>API Key de Anthropic</label>
+        <input type="password" id="apiKey" placeholder="sk-ant-api03-…" autocomplete="off">
+      </div>
+      <button class="btn-ghost" onclick="testKey()" style="white-space:nowrap">Verificar clave</button>
+    </div>
+
+    <!-- Config -->
+    <div class="config-grid">
+      <div class="config-card">
+        <label>Año de las facturas</label>
+        <select id="yearSelect">
+          <option value="2022">2022</option>
+          <option value="2023">2023</option>
+          <option value="2024">2024</option>
+          <option value="2025">2025</option>
+          <option value="2026" selected>2026</option>
+        </select>
+      </div>
+      <div class="config-card">
+        <label>Tipo de producto a extraer</label>
+        <select id="productType" onchange="toggleCustom()">
+          <option value="filtros" selected>Filtros (aceite, combustible, aire…)</option>
+          <option value="refrigeracion">Repuestos de refrigeración</option>
+          <option value="vehiculos">Repuestos de vehículos</option>
+          <option value="todo">Todos los productos de la factura</option>
+          <option value="custom">Personalizado…</option>
+        </select>
+      </div>
+      <div class="config-card">
+        <label>Modelo IA</label>
+        <select id="modelSelect">
+          <option value="claude-sonnet-4-20250514" selected>Sonnet 4 · Alta precisión</option>
+          <option value="claude-haiku-4-5-20251001">Haiku 4.5 · Más rápido</option>
+        </select>
+      </div>
+    </div>
+
+    <!-- Custom -->
+    <div id="customWrap">
+      <label>Describe qué productos extraer</label>
+      <input type="text" id="customDesc" placeholder="Ej: condensadores, compresores y evaporadores de refrigeración industrial…" style="margin-top:6px">
+    </div>
+
+    <!-- Drop zone -->
+    <div class="drop-zone" id="dropZone" onclick="document.getElementById('fileInput').click()">
+      <div class="drop-icon">📂</div>
+      <p class="drop-title">Arrastra las facturas PDF aquí</p>
+      <p class="drop-hint">o haz clic para seleccionar · sin límite de archivos</p>
+    </div>
+    <input type="file" id="fileInput" multiple accept=".pdf">
+
+    <!-- File list -->
+    <div class="file-list" id="fileList">
+      <div class="file-list-hdr">
+        <span id="fileCount">0 archivos</span>
+        <button class="btn-ghost" style="padding:3px 10px;font-size:0.75rem" onclick="clearAll()">Limpiar</button>
+      </div>
+      <div id="fileItems"></div>
+    </div>
+
+    <!-- Actions -->
+    <div class="btn-row">
+      <button class="btn-primary-sm" id="btnExtract" onclick="startExtraction()" disabled data-i18n="app.extract">⚡ Extraer con Claudia</button>
+      <button class="btn-dl" id="btnDL" onclick="downloadExcel()" style="display:none" data-i18n="app.download">📥 Descargar Excel</button>
+      <button class="btn-ghost" onclick="clearAll()" id="btnClr" style="display:none" data-i18n="app.clearAll">🗑 Limpiar todo</button>
+    </div>
+
+    <!-- Progress -->
+    <div class="prog-wrap" id="progWrap">
+      <div class="prog-label">
+        <span id="progText">Iniciando…</span>
+        <span id="progPct">0%</span>
+      </div>
+      <div class="prog-track"><div class="prog-fill" id="progFill"></div></div>
+    </div>
+
+    <!-- Log -->
+    <div class="log-box" id="logBox"></div>
+
+    <!-- Stats -->
+    <div class="stats-grid" id="statsGrid">
+      <div class="stat-card"><div class="stat-lbl">Facturas</div><div class="stat-val c-accent" id="sFacturas">0</div></div>
+      <div class="stat-card"><div class="stat-lbl">Líneas</div><div class="stat-val" id="sLineas">0</div></div>
+      <div class="stat-card"><div class="stat-lbl">Unidades</div><div class="stat-val" id="sUnidades">0</div></div>
+      <div class="stat-card"><div class="stat-lbl">Total €</div><div class="stat-val c-green" id="sTotal">0,00 €</div></div>
+    </div>
+
+    <!-- Results -->
+    <div class="results-wrap" id="resultsWrap">
+      <div class="results-hdr">
+        <span>Datos extraídos</span>
+        <span id="rCount">0 líneas</span>
+      </div>
+      <div class="tbl-scroll">
+        <table>
+          <thead>
+            <tr>
+              <th>Factura</th><th>Fecha</th><th>Destino</th>
+              <th>Tipo</th><th>Modelo / Ref.</th>
+              <th style="text-align:right">Cant.</th>
+              <th style="text-align:right">P.Unit.</th>
+              <th style="text-align:right">Total</th>
+            </tr>
+          </thead>
+          <tbody id="rBody"></tbody>
+        </table>
+      </div>
+    </div>
+
+  </div>
+</section>
+
+<!-- ── FOOTER ─────────────────────────────────────────────────────────────── -->
+<footer>
+  <div class="container">
+    <div class="footer-logo">Extractor<span>.app</span></div>
+    <ul class="footer-links">
+      <li><a href="#como-funciona">Cómo funciona</a></li>
+      <li><a href="#precios">Precios</a></li>
+      <!-- Cambia este email por el tuyo -->
+      <li><a href="/cdn-cgi/l/email-protection#f39b9c9f92b3968b87819290879c81dd928383" data-i18n="footer.contact">Contacto</a></li>
+    </ul>
+    <p class="footer-copy">© 2025 Extractor.app · Powered by Claudia · Semper intentus · Todos los derechos reservados</p>
+  </div>
+</footer>
+
+<!-- ── JAVASCRIPT ─────────────────────────────────────────────────────────── -->
+<script data-cfasync="false" src="/cdn-cgi/scripts/5c5dd728/cloudflare-static/email-decode.min.js"></script><script>
+
+// ── i18n INIT ─────────────────────────────────────────────
+
+// ═══════════════════════════════════════════════════════
+// i18n — Bilingual ES / EN
+// VERCEL: add fr:{} and zh:{} objects following same keys
+// ═══════════════════════════════════════════════════════
+const TRANSLATIONS = {
+  es: {
+    'nav.how':'Cómo funciona','nav.features':'Características',
+    'nav.pricing':'Precios','nav.cta':'Usar ahora →',
+    'hero.badge':'Powered by Claudia · Semper intentus',
+    'hero.sub':'Sube tus facturas, elige qué extraer y descarga un Excel estructurado. Sin configuraciones, sin plantillas, sin errores manuales.',
+    'hero.cta1':'⚡ Empezar ahora','hero.cta2':'Ver cómo funciona',
+    'how.eyebrow':'Proceso','feat.eyebrow':'Características',
+    'price.eyebrow':'Precios','app.eyebrow':'Herramienta',
+    'app.title':'Empieza a extraer',
+    'app.extract':'⚡ Extraer con Claudia',
+    'app.download':'📥 Descargar Excel',
+    'app.clearAll':'🗑 Limpiar todo',
+    'app.verify':'Verificar clave',
+    'app.clear':'Limpiar',
+    'footer.contact':'Contacto',
+    'price.popular':'MÁS POPULAR',
+    'price.note':'Pago seguro · Los créditos no caducan · IVA no incluido',
+    // log / badge messages used in JS
+    'log.dup':'Archivos ya cargados, ignorados.',
+    'log.added':'archivo(s) añadido(s). Total:',
+    'log.starting':'Iniciando extracción de',
+    'log.invoices':'factura(s)…',
+    'log.read':'PDF leído:',
+    'log.noitems':'sin productos detectados.',
+    'log.done':'línea(s) extraída(s).',
+    'log.complete':'Proceso completado.',
+    'log.lines':'línea(s) de',
+    'log.apicheck':'Verificando API key…',
+    'log.apivalid':'✓ API key válida.',
+    'log.nokey':'Introduce tu API key primero.',
+    'log.nokey2':'Introduce tu API key.',
+    'prog.reading':'Leyendo:','prog.extracting':'Extrayendo:','prog.done':'Completado ✓',
+    'badge.pending':'pendiente','badge.reading':'leyendo PDF','badge.extracting':'Claudia…',
+    'badge.noresults':'sin resultados','badge.errpdf':'error PDF','badge.errapi':'error API',
+  },
+  en: {
+    'nav.how':'How it works','nav.features':'Features',
+    'nav.pricing':'Pricing','nav.cta':'Start now →',
+    'hero.badge':'Powered by Claudia · Semper intentus',
+    'hero.sub':'Upload your invoices, choose what to extract and download a structured Excel. No setup, no templates, no manual errors.',
+    'hero.cta1':'⚡ Start now','hero.cta2':'See how it works',
+    'how.eyebrow':'Process','feat.eyebrow':'Features',
+    'price.eyebrow':'Pricing','app.eyebrow':'Tool',
+    'app.title':'Start extracting',
+    'app.extract':'⚡ Extract with Claudia',
+    'app.download':'📥 Download Excel',
+    'app.clearAll':'🗑 Clear all',
+    'app.verify':'Verify key',
+    'app.clear':'Clear',
+    'footer.contact':'Contact',
+    'price.popular':'MOST POPULAR',
+    'price.note':'Secure payment · Credits never expire · VAT not included',
+    'log.dup':'Files already loaded, ignored.',
+    'log.added':'file(s) added. Total:',
+    'log.starting':'Starting extraction of',
+    'log.invoices':'invoice(s)…',
+    'log.read':'PDF read:',
+    'log.noitems':'no products detected.',
+    'log.done':'line(s) extracted.',
+    'log.complete':'Process complete.',
+    'log.lines':'line(s) from',
+    'log.apicheck':'Verifying API key…',
+    'log.apivalid':'✓ API key valid.',
+    'log.nokey':'Enter your API key first.',
+    'log.nokey2':'Enter your API key.',
+    'prog.reading':'Reading:','prog.extracting':'Extracting:','prog.done':'Completed ✓',
+    'badge.pending':'pending','badge.reading':'reading PDF','badge.extracting':'Claudia…',
+    'badge.noresults':'no results','badge.errpdf':'PDF error','badge.errapi':'API error',
+  }
+  // VERCEL: fr: {...}, zh: {...}
+};
+
+let LANG = localStorage.getItem('xapp_lang') || 'es';
+
+function _t(k) { return (TRANSLATIONS[LANG] && TRANSLATIONS[LANG][k]) || TRANSLATIONS['es'][k] || k; }
+
+function setLang(l) {
+  LANG = l;
+  localStorage.setItem('xapp_lang', l);
+  document.documentElement.lang = l;
+  document.querySelectorAll('.lang-btn').forEach(b => b.classList.remove('active'));
+  const lb = document.getElementById('lb-' + l);
+  if (lb) lb.classList.add('active');
+  _applyI18n();
+  // update page title
+  document.title = l === 'en'
+    ? 'Extractor.app · PDF Invoices → Excel in seconds'
+    : 'Extractor.app · Facturas PDF → Excel en segundos';
+}
+
+function _applyI18n() {
+  document.querySelectorAll('[data-i18n]').forEach(el => {
+    const v = _t(el.dataset.i18n);
+    if (v) el.textContent = v;
+  });
+}
+
+// Override log/badge functions to use translations
+const _origLog = window._logFn || null;
+
+// patch badge & log calls to use _t()
+// (these are called by startExtraction and helpers)
+
+// Apply on load
+setLang(LANG);
+
+pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.4.120/pdf.worker.min.js';
+
+let files = [], results = [];
+
+// ── DRAG & DROP ───────────────────────────────────────────────────────────
+const dz = document.getElementById('dropZone');
+const fi = document.getElementById('fileInput');
+dz.addEventListener('dragover', e => { e.preventDefault(); dz.classList.add('dragover'); });
+dz.addEventListener('dragleave', () => dz.classList.remove('dragover'));
+dz.addEventListener('drop', e => { e.preventDefault(); dz.classList.remove('dragover'); addFiles([...e.dataTransfer.files].filter(f=>f.type==='application/pdf')); });
+fi.addEventListener('change', () => { addFiles([...fi.files]); fi.value=''; });
+
+function addFiles(nf) {
+  const ex = new Set(files.map(f=>f.name+f.size));
+  const fresh = nf.filter(f=>!ex.has(f.name+f.size));
+  if (!fresh.length) { log('warn', _t('log.dup')); return; }
+  files = [...files, ...fresh];
+  renderList(); updateBtn();
+  log('info', `+${fresh.length} archivo(s). Total: ${files.length}`);
+}
+
+function renderList() {
+  document.getElementById('fileItems').innerHTML = files.map((f,i)=>`
+    <div class="file-item" id="fi-${i}">
+      <span class="file-num">${String(i+1).padStart(2,'0')}</span>
+      <span class="file-name" title="${f.name}">${f.name}</span>
+      <span class="file-sz">${(f.size/1024).toFixed(0)} KB</span>
+      <span class="badge badge-pending" id="b-${i}">pendiente</span>
+    </div>`).join('');
+  document.getElementById('fileCount').textContent = `${files.length} archivo(s)`;
+  document.getElementById('fileList').style.display = 'block';
+}
+
+function clearAll() {
+  files=[]; results=[];
+  ['fileList','progWrap','resultsWrap','logBox'].forEach(id=>document.getElementById(id).style.display='none');
+  document.getElementById('statsGrid').style.display='none';
+  document.getElementById('fileItems').innerHTML='';
+  document.getElementById('rBody').innerHTML='';
+  document.getElementById('btnDL').style.display='none';
+  document.getElementById('btnClr').style.display='none';
+  document.getElementById('btnExtract').disabled=true;
+}
+
+function updateBtn() { document.getElementById('btnExtract').disabled = !files.length; }
+function toggleCustom() {
+  document.getElementById('customWrap').style.display =
+    document.getElementById('productType').value === 'custom' ? 'block' : 'none';
+}
+
+// ── LOG ───────────────────────────────────────────────────────────────────
+function log(type, msg) {
+  const box = document.getElementById('logBox');
+  box.style.display = 'block';
+  const ts = new Date().toLocaleTimeString('es-ES',{hour12:false});
+  const d = document.createElement('div');
+  d.className = `ll ${type}`; d.textContent = `[${ts}] ${msg}`;
+  box.appendChild(d); box.scrollTop = box.scrollHeight;
+}
+
+// ── PDF TEXT ──────────────────────────────────────────────────────────────
+async function pdfText(file) {
+  const pdf = await pdfjsLib.getDocument({data: await file.arrayBuffer()}).promise;
+  let t = '';
+  for (let p=1; p<=Math.min(pdf.numPages,8); p++) {
+    const page = await pdf.getPage(p);
+    const c = await page.getTextContent();
+    t += c.items.map(i=>i.str).join(' ') + '\n';
+  }
+  return t;
+}
+
+// ── BUILD PROMPT ──────────────────────────────────────────────────────────
+function buildPrompt(text, filename) {
+  const pt = document.getElementById('productType').value;
+  const cd = document.getElementById('customDesc').value.trim();
+
+  const configs = {
+    filtros: {
+      role: 'experto en extracción de datos de facturas de filtros industriales y de vehículos',
+      what: 'filtros de cualquier tipo (aceite, combustible/gasoil, aire, hidráulico, separador, secador, habitáculo, gasolina, agua)',
+      ignore: 'portes, servicios administrativos, palets, vasos plásticos y cualquier artículo que no sea un filtro',
+      tipo_example: 'FILTRO DE ACEITE, FILTRO DE COMBUSTIBLE, FILTRO DE AIRE, FILTRO HIDRÁULICO, FILTRO SEPARADOR, FILTRO SECADOR, FILTRO DE HABITÁCULO'
+    },
+    refrigeracion: {
+      role: 'experto en extracción de datos de facturas de repuestos de refrigeración y climatización',
+      what: 'repuestos de refrigeración: condensadores, evaporadores, compresores, válvulas de expansión, presostatos, termostatos, ventiladores, carcasas y cualquier componente de sistema frigorífico',
+      ignore: 'portes, servicios y cualquier artículo que no sea un repuesto de refrigeración',
+      tipo_example: 'CONDENSADOR, EVAPORADOR, COMPRESOR, VÁLVULA, PRESOSTATO, TERMOSTATO, VENTILADOR, FILTRO DESHIDRATADOR'
+    },
+    vehiculos: {
+      role: 'experto en extracción de datos de facturas de repuestos de vehículos y maquinaria',
+      what: 'repuestos de vehículos y maquinaria: filtros, frenos, embragues, correas, amortiguadores, juntas, rodamientos, bujías, y cualquier pieza de recambio',
+      ignore: 'portes, servicios administrativos y consumibles no técnicos',
+      tipo_example: 'FILTRO, PASTILLA DE FRENO, CORREA, AMORTIGUADOR, JUNTA, RODAMIENTO, BUJÍA'
+    },
+    todo: {
+      role: 'experto en extracción de datos de facturas comerciales',
+      what: 'todos los productos o artículos que aparecen como líneas de producto en la factura',
+      ignore: 'solo portes/envío con precio 0 y líneas de texto descriptivo sin precio',
+      tipo_example: 'el tipo o categoría del producto según lo que sea'
+    },
+    custom: {
+      role: `experto en extracción de datos de facturas de: ${cd||'productos varios'}`,
+      what: cd || 'todos los productos',
+      ignore: 'portes, servicios sin producto físico',
+      tipo_example: 'la categoría que corresponda al producto'
+    }
+  };
+
+  const c = configs[pt] || configs.filtros;
+
+  return `Eres un ${c.role}.
+
+Analiza el texto de esta factura PDF y extrae TODOS los artículos que sean: ${c.what}.
+Ignora: ${c.ignore}.
+
+Instrucciones de extracción:
+- El número de factura suele aparecer como "FACTURA #Factura_X-XXXX/XX" o similar al principio del documento.
+- La fecha aparece cerca del número de factura.
+- El destino suele ser BATA, MALABO, u otro lugar indicado al final de la factura.
+- El tipo debe describir el tipo de producto (${c.tipo_example}).
+- El modelo es la referencia del fabricante del producto.
+- La ref_interna es el código que aparece al inicio de cada línea de producto.
+- Si un campo no aparece, usa null o cadena vacía.
+
+Responde ÚNICAMENTE con un array JSON válido, sin texto adicional, sin backticks:
+[
+  {
+    "factura": "Factura_X-XXXX/XX",
+    "fecha": "DD/MM/AAAA",
+    "destino": "BATA",
+    "ref_interna": "CMF9015",
+    "tipo": "FILTRO DE COMBUSTIBLE",
+    "modelo": "WK828X",
+    "cantidad": 20,
+    "precio_unitario": 5.79,
+    "total": 115.75
+  }
+]
+
+Si no hay productos que coincidan, devuelve: []
+
+Texto de la factura (${filename}):
+---
+${text.substring(0, 4500)}
+---`;
+}
+
+// ── CLAUDE API ────────────────────────────────────────────────────────────
+async function callClaude(text, filename) {
+  const key   = document.getElementById('apiKey').value.trim();
+  const model = document.getElementById('modelSelect').value;
+  const res = await fetch('https://api.anthropic.com/v1/messages', {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+      'x-api-key': key,
+      'anthropic-version': '2023-06-01',
+      'anthropic-dangerous-direct-browser-access': 'true'
+    },
+    body: JSON.stringify({
+      model, max_tokens: 4096,
+      messages: [{ role: 'user', content: buildPrompt(text, filename) }]
+    })
+  });
+  if (!res.ok) { const e = await res.json().catch(()=>({})); throw new Error(e.error?.message||`HTTP ${res.status}`); }
+  const data = await res.json();
+  const raw  = data.content?.map(c=>c.text||'').join('') || '[]';
+  try { return JSON.parse(raw.replace(/```json|```/g,'').trim()); }
+  catch { throw new Error('JSON inválido: ' + raw.substring(0,80)); }
+}
+
+// ── VERIFY KEY ────────────────────────────────────────────────────────────
+async function testKey() {
+  const key = document.getElementById('apiKey').value.trim();
+  if (!key) { log('warn', _t('log.nokey')); return; }
+  log('info', _t('log.apicheck'));
+  try {
+    const r = await fetch('https://api.anthropic.com/v1/messages', {
+      method:'POST',
+      headers:{'Content-Type':'application/json','x-api-key':key,'anthropic-version':'2023-06-01','anthropic-dangerous-direct-browser-access':'true'},
+      body: JSON.stringify({model:'claude-haiku-4-5-20251001',max_tokens:5,messages:[{role:'user',content:'ok'}]})
+    });
+    if (r.ok) log('ok', _t('log.apivalid'));
+    else { const e=await r.json().catch(()=>({})); log('err','✗ '+( e.error?.message||r.status)); }
+  } catch(e) { log('err','✗ '+e.message); }
+}
+
+// ── MAIN LOOP ─────────────────────────────────────────────────────────────
+async function startExtraction() {
+  if (!files.length) return;
+  if (!document.getElementById('apiKey').value.trim()) { log('err', _t('log.nokey2')); return; }
+  results=[];
+  document.getElementById('rBody').innerHTML='';
+  document.getElementById('btnExtract').disabled=true;
+  document.getElementById('btnDL').style.display='none';
+  document.getElementById('progWrap').style.display='block';
+  document.getElementById('resultsWrap').style.display='block';
+  document.getElementById('statsGrid').style.display='grid';
+  log('info', `${_t('log.starting')} ${files.length} ${_t('log.invoices')}`);
+
+  for (let i=0; i<files.length; i++) {
+    const f = files[i];
+    setBadge(i,'reading',_t('badge.reading')); setProgress(i,files.length,`${_t('prog.reading')} ${f.name}`);
+    let txt='';
+    try { txt=await pdfText(f); log('info', `${_t('log.read')} ${f.name}`); }
+    catch(e) { setBadge(i,'error',_t('badge.errpdf')); log('err',`${f.name}: ${e.message}`); continue; }
+
+    setBadge(i,'extracting',_t('badge.extracting')); setProgress(i,files.length,`${_t('prog.extracting')} ${f.name}`);
+    try {
+      const items = await callClaude(txt, f.name);
+      if (!items.length) { setBadge(i,'done',_t('badge.noresults')); log('warn', `${f.name}: ${_t('log.noitems')}`); continue; }
+      items.forEach(item => {
+        if (!item.factura) item.factura = f.name.replace('.pdf','');
+        results.push(item); appendRow(item);
+      });
+      setBadge(i,'done',`✓ ${items.length} líneas`);
+      log('ok', `${f.name}: ${items.length} ${_t('log.done')}`);
+    } catch(e) { setBadge(i,'error',_t('badge.errapi')); log('err',`${f.name}: ${e.message}`); }
+
+    updateStats();
+    if (i<files.length-1) await new Promise(r=>setTimeout(r,700));
+  }
+
+  setProgress(files.length,files.length,_t('prog.done'));
+  document.getElementById('btnExtract').disabled=false;
+  document.getElementById('btnClr').style.display='inline-block';
+  if (results.length) { document.getElementById('btnDL').style.display='inline-block'; }
+  log('ok', `✓ ${_t('log.complete')} ${results.length} ${_t('log.lines')} ${files.length} ${_t('log.invoices')}`);
+}
+
+function sleep(ms){return new Promise(r=>setTimeout(r,ms));}
+function setBadge(i,t,tx){const b=document.getElementById(`b-${i}`);if(b){b.className=`badge badge-${t}`;b.textContent=tx;}}
+function setProgress(done,total,txt){
+  const pct=total?Math.round(done/total*100):0;
+  document.getElementById('progFill').style.width=pct+'%';
+  document.getElementById('progText').textContent=txt;
+  document.getElementById('progPct').textContent=pct+'%';
+}
+function appendRow(item){
+  const tb=document.getElementById('rBody');
+  const fmt=v=>v!=null?Number(v).toLocaleString('es-ES',{minimumFractionDigits:2,maximumFractionDigits:2})+' €':'-';
+  const tr=document.createElement('tr');
+  tr.innerHTML=`
+    <td class="td-fact" title="${item.factura}">${item.factura}</td>
+    <td>${item.fecha||'-'}</td><td>${item.destino||'-'}</td>
+    <td class="td-tipo">${item.tipo||'-'}</td>
+    <td class="td-model">${item.modelo||'-'}</td>
+    <td class="td-r">${item.cantidad??'-'}</td>
+    <td class="td-r">${fmt(item.precio_unitario)}</td>
+    <td class="td-total">${fmt(item.total)}</td>`;
+  tb.appendChild(tr);
+  document.getElementById('rCount').textContent=`${tb.children.length} líneas`;
+}
+function updateStats(){
+  const f=new Set(results.map(r=>r.factura)).size;
+  const u=results.reduce((s,r)=>s+(Number(r.cantidad)||0),0);
+  const t=results.reduce((s,r)=>s+(Number(r.total)||0),0);
+  document.getElementById('sFacturas').textContent=f;
+  document.getElementById('sLineas').textContent=results.length;
+  document.getElementById('sUnidades').textContent=u;
+  document.getElementById('sTotal').textContent=t.toLocaleString('es-ES',{minimumFractionDigits:2})+' €';
+}
+
+// ── EXCEL DOWNLOAD ────────────────────────────────────────────────────────
+function downloadExcel(){
+  if(!results.length) return;
+  const year=document.getElementById('yearSelect').value;
+  const pt  =document.getElementById('productType').value;
+  const yearColors={'2022':'C55A11','2023':'833C00','2024':'2E75B6','2025':'14375E','2026':'1F3864'};
+  const hc  = yearColors[year]||'1F3864';
+
+  const wb = XLSX.utils.book_new();
+
+  // Sheet 1: Detalle
+  const hdrs=['Factura','Fecha','Destino','Ref. interna','Tipo de producto','Modelo','Cantidad','Precio unit. (€)','Total (€)'];
+  const wsData=[hdrs,...results.map(r=>[r.factura,r.fecha,r.destino,r.ref_interna||'',r.tipo,r.modelo,Number(r.cantidad)||0,Number(r.precio_unitario)||0,Number(r.total)||0])];
+  const ws=XLSX.utils.aoa_to_sheet(wsData);
+  ws['!cols']=[28,13,12,16,24,18,10,18,14].map(w=>({wch:w}));
+  XLSX.utils.book_append_sheet(wb,ws,'Detalle');
+
+  // Sheet 2: Resumen por factura
+  const facts=[...new Set(results.map(r=>r.factura))];
+  const rd2=[['Factura','Fecha','Destino','Nº líneas','Uds.','Total (€)']];
+  facts.forEach(fn=>{
+    const rr=results.filter(r=>r.factura===fn);
+    rd2.push([fn,rr[0]?.fecha||'',rr[0]?.destino||'',rr.length,rr.reduce((s,r)=>s+(Number(r.cantidad)||0),0),rr.reduce((s,r)=>s+(Number(r.total)||0),0)]);
+  });
+  rd2.push(['TOTAL',,,results.length,results.reduce((s,r)=>s+(Number(r.cantidad)||0),0),results.reduce((s,r)=>s+(Number(r.total)||0),0)]);
+  const ws2=XLSX.utils.aoa_to_sheet(rd2);
+  ws2['!cols']=[30,13,12,10,10,16].map(w=>({wch:w}));
+  XLSX.utils.book_append_sheet(wb,ws2,'Por factura');
+
+  // Sheet 3: Resumen por tipo
+  const tipos=[...new Set(results.map(r=>r.tipo))].sort();
+  const rd3=[['Tipo de producto','Nº líneas','Uds.','Total (€)']];
+  tipos.forEach(t=>{
+    const rr=results.filter(r=>r.tipo===t);
+    rd3.push([t,rr.length,rr.reduce((s,r)=>s+(Number(r.cantidad)||0),0),rr.reduce((s,r)=>s+(Number(r.total)||0),0)]);
+  });
+  const ws3=XLSX.utils.aoa_to_sheet(rd
