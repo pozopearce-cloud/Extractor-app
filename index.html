@@ -678,6 +678,10 @@ footer {
   .api-bar     { flex-direction: column; }
   .hero-stats  { gap: 1.5rem; }
 }
+
+  #como-funciona, #caracteristicas, #precios, #app {
+    scroll-margin-top: 68px;
+  }
 </style>
 </head>
 <body class="page">
@@ -841,13 +845,13 @@ footer {
         <div class="plan-price">9<span> €</span></div>
         <div class="plan-pages">50 páginas de factura</div>
         <ul class="plan-features">
-          <li>~10–15 facturas estándar</li>
+          <li>~10–50 facturas estándar</li>
           <li>Todos los tipos de producto</li>
           <li>Descarga Excel completo</li>
           <li>Soporte por email</li>
         </ul>
-        <!-- Sustituye el href por tu link de SumUp para 9€ -->
-        <a href="/cdn-cgi/l/email-protection#442c2b282504213c30362527302b366a2534347b3731262e21273079072b2934362561767471746176743487e5232d2a2537" class="plan-btn">
+        <!-- SumUp · Starter 50 páginas · 9€ -->
+        <a href="https://pay.sumup.com/b2c/QPUOU4XD" class="plan-btn" target="_blank">
           Comprar · 9 €
         </a>
       </div>
@@ -858,13 +862,13 @@ footer {
         <div class="plan-price">19<span> €</span></div>
         <div class="plan-pages">100 páginas de factura</div>
         <ul class="plan-features">
-          <li>~25–35 facturas estándar</li>
+          <li>~25–100 facturas estándar</li>
           <li>Todos los tipos de producto</li>
           <li>Descarga Excel completo</li>
           <li>Soporte prioritario</li>
         </ul>
-        <!-- Sustituye el href por tu link de SumUp para 19€ -->
-        <a href="/cdn-cgi/l/email-protection#90f8fffcf1d0f5e8e4e2f1f3e4ffe2bef1e0e0afe3e5f2faf5f3e4add3fffde0e2f1b5a2a0a1a0a0b5a2a0e05331f7f9fef1e3" class="plan-btn primary">
+        <!-- SumUp · Pro 100 páginas · 19€ -->
+        <a href="https://pay.sumup.com/b2c/QME9NATV" class="plan-btn primary" target="_blank">
           Comprar · 19 €
         </a>
       </div>
@@ -874,14 +878,21 @@ footer {
         <div class="plan-price">39<span> €</span></div>
         <div class="plan-pages">300 páginas de factura</div>
         <ul class="plan-features">
-          <li>~80–100 facturas estándar</li>
+          <li>~80–300 facturas estándar</li>
           <li>Todos los tipos de producto</li>
           <li>Descarga Excel completo</li>
-          <li>Soporte prioritario + llamada</li>
+          <li>Soporte prioritario + WhatsApp</li>
         </ul>
-        <!-- Sustituye el href por tu link de SumUp para 39€ -->
-        <a href="/cdn-cgi/l/email-protection#f79f989b96b7928f83859694839885d9968787c88482959d929483cab4989a878596d2c5c7c4c7c7d2c5c7873456909e999684" class="plan-btn">
+        <!-- SumUp · Business 300 páginas · 39€ -->
+        <a href="https://pay.sumup.com/b2c/Q1QLUV6A" class="plan-btn" target="_blank">
           Comprar · 39 €
+        </a>
+        <a href="https://wa.me/34637173169?text=Hola%2C%20me%20interesa%20el%20plan%20Business%20de%20Extractor.app" 
+           target="_blank" 
+           style="display:flex;align-items:center;justify-content:center;gap:7px;margin-top:10px;padding:10px;border-radius:8px;background:rgba(37,211,102,.12);border:1px solid rgba(37,211,102,.35);color:#22c55e;font-size:.85rem;font-weight:500;text-decoration:none;transition:all .15s"
+           onmouseover="this.style.background='rgba(37,211,102,.22)'" 
+           onmouseout="this.style.background='rgba(37,211,102,.12)'">
+          <span style="font-size:1.1rem">💬</span> WhatsApp · +34 637 173 169
         </a>
       </div>
 
@@ -897,7 +908,7 @@ footer {
     <h2 data-i18n="app.title">Empieza a extraer</h2>
     <p class="section-sub" style="margin-bottom:2rem">
       Necesitas una API key de Anthropic. Si compraste créditos y aún no la tienes,
-      <a href="/cdn-cgi/l/email-protection#0c6463606d4c6974787e6d6f78637e226d7c7c" style="color:var(--accent)">escríbenos</a> y te ayudamos.
+      <a href="/cdn-cgi/l/email-protection#731a1d151c330010121d5e141c5d120303" style="color:var(--accent)">escríbenos</a> y te ayudamos.
     </p>
 
     <!-- API Key -->
@@ -914,11 +925,16 @@ footer {
       <div class="config-card">
         <label>Año de las facturas</label>
         <select id="yearSelect">
+          <option value="auto" selected>🔍 Automático (recomendado)</option>
           <option value="2022">2022</option>
           <option value="2023">2023</option>
           <option value="2024">2024</option>
           <option value="2025">2025</option>
-          <option value="2026" selected>2026</option>
+          <option value="2026">2026</option>
+          <option value="2027">2027</option>
+          <option value="2028">2028</option>
+          <option value="2029">2029</option>
+          <option value="2030">2030</option>
         </select>
       </div>
       <div class="config-card">
@@ -932,10 +948,10 @@ footer {
         </select>
       </div>
       <div class="config-card">
-        <label>Modelo IA</label>
+        <label>Escoger</label>
         <select id="modelSelect">
-          <option value="claude-sonnet-4-20250514" selected>Sonnet 4 · Alta precisión</option>
-          <option value="claude-haiku-4-5-20251001">Haiku 4.5 · Más rápido</option>
+          <option value="claude-sonnet-4-20250514" selected>Alta precisión</option>
+          <option value="claude-haiku-4-5-20251001">Más rápido</option>
         </select>
       </div>
     </div>
@@ -1000,7 +1016,7 @@ footer {
         <table>
           <thead>
             <tr>
-              <th>Factura</th><th>Fecha</th><th>Destino</th>
+              <th>Año</th><th>Factura</th><th>Fecha</th><th>Destino</th>
               <th>Tipo</th><th>Modelo / Ref.</th>
               <th style="text-align:right">Cant.</th>
               <th style="text-align:right">P.Unit.</th>
@@ -1023,14 +1039,27 @@ footer {
       <li><a href="#como-funciona">Cómo funciona</a></li>
       <li><a href="#precios">Precios</a></li>
       <!-- Cambia este email por el tuyo -->
-      <li><a href="/cdn-cgi/l/email-protection#f39b9c9f92b3968b87819290879c81dd928383" data-i18n="footer.contact">Contacto</a></li>
+      <li><a href="/cdn-cgi/l/email-protection#f891969e97b88b9b9996d59f97d6998888" data-i18n="footer.contact">Contacto</a></li>
     </ul>
-    <p class="footer-copy">© 2025 Extractor.app · Powered by Claudia · Semper intentus · Todos los derechos reservados</p>
+    <p class="footer-copy">© 2025 A_Pearce S.L. · Extractor.app · Powered by Claudia · Semper intentus</p>
   </div>
 </footer>
 
 <!-- ── JAVASCRIPT ─────────────────────────────────────────────────────────── -->
-<script data-cfasync="false" src="/cdn-cgi/scripts/5c5dd728/cloudflare-static/email-decode.min.js"></script><script>
+<script data-cfasync="false" src="/cdn-cgi/scripts/5c5dd728/cloudflare-static/email-decode.min.js">
+// ── SMOOTH SCROLL with nav offset ────────────────────────────────────────────
+document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+  anchor.addEventListener('click', function(e) {
+    const target = document.querySelector(this.getAttribute('href'));
+    if (!target) return;
+    e.preventDefault();
+    const navH = document.querySelector('nav')?.offsetHeight || 60;
+    const top = target.getBoundingClientRect().top + window.scrollY - navH - 8;
+    window.scrollTo({ top, behavior: 'smooth' });
+  });
+});
+
+</script><script>
 
 // ── i18n INIT ─────────────────────────────────────────────
 
@@ -1411,9 +1440,35 @@ function updateStats(){
 }
 
 // ── EXCEL DOWNLOAD ────────────────────────────────────────────────────────
+
+// ── AUTO-DETECT YEAR from invoice date ──────────────────────────────────────
+function detectYearFromDate(dateStr) {
+  if (!dateStr) return null;
+  // Matches DD/MM/YYYY or YYYY-MM-DD or similar
+  const m = dateStr.match(/\b(20\d{2})\b/);
+  return m ? m[1] : null;
+}
+
+function getEffectiveYear() {
+  const sel = document.getElementById('yearSelect').value;
+  if (sel !== 'auto') return sel;
+  // Auto: take the year from the first result that has a date
+  for (const r of results) {
+    const y = detectYearFromDate(r.fecha);
+    if (y) return y;
+  }
+  return new Date().getFullYear().toString();
+}
+
+function getYearForItem(item) {
+  const sel = document.getElementById('yearSelect').value;
+  if (sel !== 'auto') return sel;
+  return detectYearFromDate(item.fecha) || new Date().getFullYear().toString();
+}
+
 function downloadExcel(){
   if(!results.length) return;
-  const year=document.getElementById('yearSelect').value;
+  const year=getEffectiveYear();
   const pt  =document.getElementById('productType').value;
   const yearColors={'2022':'C55A11','2023':'833C00','2024':'2E75B6','2025':'14375E','2026':'1F3864'};
   const hc  = yearColors[year]||'1F3864';
@@ -1435,15 +1490,4 @@ function downloadExcel(){
     rd2.push([fn,rr[0]?.fecha||'',rr[0]?.destino||'',rr.length,rr.reduce((s,r)=>s+(Number(r.cantidad)||0),0),rr.reduce((s,r)=>s+(Number(r.total)||0),0)]);
   });
   rd2.push(['TOTAL',,,results.length,results.reduce((s,r)=>s+(Number(r.cantidad)||0),0),results.reduce((s,r)=>s+(Number(r.total)||0),0)]);
-  const ws2=XLSX.utils.aoa_to_sheet(rd2);
-  ws2['!cols']=[30,13,12,10,10,16].map(w=>({wch:w}));
-  XLSX.utils.book_append_sheet(wb,ws2,'Por factura');
-
-  // Sheet 3: Resumen por tipo
-  const tipos=[...new Set(results.map(r=>r.tipo))].sort();
-  const rd3=[['Tipo de producto','Nº líneas','Uds.','Total (€)']];
-  tipos.forEach(t=>{
-    const rr=results.filter(r=>r.tipo===t);
-    rd3.push([t,rr.length,rr.reduce((s,r)=>s+(Number(r.cantidad)||0),0),rr.reduce((s,r)=>s+(Number(r.total)||0),0)]);
-  });
-  const ws3=XLSX.utils.aoa_to_sheet(rd
+  const ws
