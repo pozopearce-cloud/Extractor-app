@@ -1,0 +1,210 @@
+- generic [ref=e1]:
+  - generic [ref=e2]:
+    - button "ES" [ref=e3] [cursor=pointer]
+    - button "EN" [ref=e4] [cursor=pointer]
+  - navigation [ref=e5]:
+    - generic [ref=e6]:
+      - link "⚡ Extractor.app" [ref=e7] [cursor=pointer]:
+        - /url: "#"
+        - generic [ref=e8]: ⚡
+        - generic [ref=e9]: Extractor.app
+      - list [ref=e10]:
+        - listitem [ref=e11]:
+          - link "Cómo funciona" [ref=e12] [cursor=pointer]:
+            - /url: "#como-funciona"
+        - listitem [ref=e13]:
+          - link "Características" [ref=e14] [cursor=pointer]:
+            - /url: "#caracteristicas"
+        - listitem [ref=e15]:
+          - link "Precios" [ref=e16] [cursor=pointer]:
+            - /url: "#precios"
+        - listitem [ref=e17]:
+          - link "Usar ahora →" [ref=e18] [cursor=pointer]:
+            - /url: "#app"
+  - generic [ref=e20]:
+    - generic [ref=e21]: ● Powered by Claudia · Semper intentus
+    - heading "Facturas PDF → Excel en segundos" [level=1] [ref=e22]:
+      - text: Facturas PDF → Excel
+      - text: en segundos
+    - paragraph [ref=e23]: Sube tus facturas, elige qué extraer y descarga un Excel perfectamente estructurado. Sin configuraciones, sin plantillas, sin errores manuales.
+    - generic [ref=e24]:
+      - link "⚡ Empezar ahora" [ref=e25] [cursor=pointer]:
+        - /url: "#app"
+      - link "Ver cómo funciona" [ref=e26] [cursor=pointer]:
+        - /url: "#como-funciona"
+    - generic [ref=e27]:
+      - generic [ref=e28]:
+        - generic [ref=e29]: 99%
+        - text: precisión
+      - generic [ref=e30]:
+        - generic [ref=e31]: <30s
+        - text: por factura
+      - generic [ref=e32]:
+        - generic [ref=e33]: ∞
+        - text: tipos de producto
+      - generic [ref=e34]:
+        - generic [ref=e35]: "0"
+        - text: instalación
+  - generic [ref=e37]:
+    - paragraph [ref=e38]: Proceso
+    - heading "Tres pasos, todo resuelto" [level=2] [ref=e39]
+    - paragraph [ref=e40]: Sin curva de aprendizaje. Sin plantillas que configurar. Solo sube, extrae y descarga.
+    - generic [ref=e41]:
+      - generic [ref=e42]:
+        - generic [ref=e43]: "01"
+        - generic [ref=e44]: 📂
+        - heading "Sube tus PDFs" [level=3] [ref=e45]
+        - paragraph [ref=e46]: Arrastra todas tus facturas de una vez, sin límite de archivos ni de páginas por sesión.
+      - generic [ref=e47]:
+        - generic [ref=e48]: "02"
+        - generic [ref=e49]: 🧠
+        - heading "Claudia lee y entiende" [level=3] [ref=e50]
+        - paragraph [ref=e51]: La IA lee cada factura, identifica los productos que buscas y extrae modelo, cantidad y precio.
+      - generic [ref=e52]:
+        - generic [ref=e53]: "03"
+        - generic [ref=e54]: 📊
+        - heading "Descarga el Excel" [level=3] [ref=e55]
+        - paragraph [ref=e56]: Obtienes un Excel con detalle por línea, resumen por factura y resumen por tipo de producto.
+      - generic [ref=e57]:
+        - generic [ref=e58]: "04"
+        - generic [ref=e59]: 🔄
+        - heading "Repite sin límites" [level=3] [ref=e60]
+        - paragraph [ref=e61]: Compra créditos de páginas y procesa todas las facturas que necesites, cuando quieras.
+  - generic [ref=e63]:
+    - paragraph [ref=e64]: Características
+    - heading "Todo lo que necesitas" [level=2] [ref=e65]
+    - paragraph [ref=e66]: Diseñado para empresas de importación, distribución y comercio internacional.
+    - generic [ref=e67]:
+      - generic [ref=e68]:
+        - generic [ref=e69]: 🗂️
+        - generic [ref=e70]:
+          - heading "Cualquier tipo de producto" [level=3] [ref=e71]
+          - paragraph [ref=e72]: Filtros, repuestos de refrigeración, piezas de vehículos, componentes industriales o todo el contenido de la factura.
+      - generic [ref=e73]:
+        - generic [ref=e74]: 📅
+        - generic [ref=e75]:
+          - heading "Años 2022 – 2026" [level=3] [ref=e76]
+          - paragraph [ref=e77]: Procesa facturas de cualquier ejercicio fiscal. El Excel se etiqueta y colorea por año automáticamente.
+      - generic [ref=e78]:
+        - generic [ref=e79]: ⚡
+        - generic [ref=e80]:
+          - heading "Procesamiento en paralelo" [level=3] [ref=e81]
+          - paragraph [ref=e82]: Sube decenas de facturas a la vez. La app procesa cada una secuencialmente mostrando el progreso en tiempo real.
+      - generic [ref=e83]:
+        - generic [ref=e84]: 🔒
+        - generic [ref=e85]:
+          - heading "Privacidad total" [level=3] [ref=e86]
+          - paragraph [ref=e87]: Los PDFs nunca salen de tu navegador. Solo el texto extraído se envía a Claudia para su análisis.
+      - generic [ref=e88]:
+        - generic [ref=e89]: 📥
+        - generic [ref=e90]:
+          - heading "Excel profesional" [level=3] [ref=e91]
+          - paragraph [ref=e92]: "Tres hojas: detalle de líneas, resumen por factura y resumen por tipo de producto. Colores por categoría incluidos."
+      - generic [ref=e93]:
+        - generic [ref=e94]: 🌍
+        - generic [ref=e95]:
+          - heading "Facturas internacionales" [level=3] [ref=e96]
+          - paragraph [ref=e97]: Funciona con facturas en español, inglés y francés. Ideal para operaciones en África occidental y central.
+  - generic [ref=e99]:
+    - paragraph [ref=e100]: Precios
+    - heading "Paga solo por lo que usas" [level=2] [ref=e101]
+    - paragraph [ref=e102]: Sin suscripción mensual. Compra créditos de páginas y úsalos cuando los necesites. No caducan.
+    - generic [ref=e103]:
+      - generic [ref=e104]:
+        - generic [ref=e105]: Starter
+        - generic [ref=e106]: 9 €
+        - generic [ref=e107]: 50 páginas de factura
+        - list [ref=e108]:
+          - listitem [ref=e109]: ✓ ~10–50 facturas estándar
+          - listitem [ref=e110]: ✓ Todos los tipos de producto
+          - listitem [ref=e111]: ✓ Descarga Excel completo
+          - listitem [ref=e112]: ✓ Soporte por email
+        - link "Comprar · 9 €" [ref=e113] [cursor=pointer]:
+          - /url: https://pay.sumup.com/b2c/QPUOU4XD
+      - generic [ref=e114]:
+        - generic [ref=e115]: MÁS POPULAR
+        - generic [ref=e116]: Pro
+        - generic [ref=e117]: 19 €
+        - generic [ref=e118]: 100 páginas de factura
+        - list [ref=e119]:
+          - listitem [ref=e120]: ✓ ~25–100 facturas estándar
+          - listitem [ref=e121]: ✓ Todos los tipos de producto
+          - listitem [ref=e122]: ✓ Descarga Excel completo
+          - listitem [ref=e123]: ✓ Soporte prioritario
+        - link "Comprar · 19 €" [ref=e124] [cursor=pointer]:
+          - /url: https://pay.sumup.com/b2c/QME9NATV
+      - generic [ref=e125]:
+        - generic [ref=e126]: Business
+        - generic [ref=e127]: 39 €
+        - generic [ref=e128]: 300 páginas de factura
+        - list [ref=e129]:
+          - listitem [ref=e130]: ✓ ~80–300 facturas estándar
+          - listitem [ref=e131]: ✓ Todos los tipos de producto
+          - listitem [ref=e132]: ✓ Descarga Excel completo
+          - listitem [ref=e133]: ✓ Soporte prioritario + WhatsApp
+        - link "Comprar · 39 €" [ref=e134] [cursor=pointer]:
+          - /url: https://pay.sumup.com/b2c/Q1QLUV6A
+        - link "💬 WhatsApp · +34 637 173 169" [ref=e135] [cursor=pointer]:
+          - /url: https://wa.me/34637173169?text=Hola%2C%20me%20interesa%20el%20plan%20Business%20de%20Extractor.app
+          - generic [ref=e136]: 💬
+          - text: WhatsApp · +34 637 173 169
+    - paragraph [ref=e137]: 🔒 Pago 100% seguro · Los créditos no caducan · Factura disponible · IVA no incluido
+  - generic [ref=e139]:
+    - paragraph [ref=e140]: Herramienta
+    - heading "Empieza a extraer" [level=2] [ref=e141]
+    - paragraph [ref=e142]:
+      - text: Necesitas una API key de Anthropic. Si compraste créditos y aún no la tienes,
+      - link "escríbenos" [ref=e143] [cursor=pointer]:
+        - /url: /cdn-cgi/l/email-protection#731a1d151c330010121d5e141c5d120303
+      - text: y te ayudamos.
+    - generic [ref=e144]:
+      - generic [ref=e145]:
+        - generic [ref=e146]: API Key de Anthropic
+        - textbox "sk-ant-api03-…" [ref=e147]: sk-ant-api03-fakefakefakefakefakefake
+      - button "Verificar clave" [active] [ref=e148] [cursor=pointer]
+    - generic [ref=e149]:
+      - generic [ref=e150]:
+        - generic [ref=e151]: Año de las facturas
+        - combobox [ref=e152]:
+          - option "🔍 Automático (recomendado)" [selected]
+          - option "2022"
+          - option "2023"
+          - option "2024"
+          - option "2025"
+          - option "2026"
+          - option "2027"
+          - option "2028"
+          - option "2029"
+          - option "2030"
+      - generic [ref=e153]:
+        - generic [ref=e154]: Tipo de producto a extraer
+        - combobox [ref=e155]:
+          - option "Filtros (aceite, combustible, aire…)" [selected]
+          - option "Repuestos de refrigeración"
+          - option "Repuestos de vehículos"
+          - option "Todos los productos de la factura"
+          - option "Personalizado…"
+      - generic [ref=e156]:
+        - generic [ref=e157]: Escoger
+        - combobox [ref=e158]:
+          - option "Alta precisión" [selected]
+          - option "Más rápido"
+    - generic [ref=e159] [cursor=pointer]:
+      - generic [ref=e160]: 📂
+      - paragraph [ref=e161]: Arrastra las facturas PDF aquí
+      - paragraph [ref=e162]: o haz clic para seleccionar · sin límite de archivos
+    - button "⚡ Extraer con Claudia" [disabled] [ref=e164]
+  - contentinfo [ref=e165]:
+    - generic [ref=e166]:
+      - generic [ref=e167]: Extractor.app
+      - list [ref=e168]:
+        - listitem [ref=e169]:
+          - link "Cómo funciona" [ref=e170] [cursor=pointer]:
+            - /url: "#como-funciona"
+        - listitem [ref=e171]:
+          - link "Precios" [ref=e172] [cursor=pointer]:
+            - /url: "#precios"
+        - listitem [ref=e173]:
+          - link "Contacto" [ref=e174] [cursor=pointer]:
+            - /url: /cdn-cgi/l/email-protection#f891969e97b88b9b9996d59f97d6998888
+      - paragraph [ref=e175]: © 2025 A_Pearce S.L. · Extractor.app · Powered by Claudia · Semper intentus

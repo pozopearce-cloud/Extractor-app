@@ -1046,7 +1046,8 @@ footer {
 </footer>
 
 <!-- ── JAVASCRIPT ─────────────────────────────────────────────────────────── -->
-<script data-cfasync="false" src="/cdn-cgi/scripts/5c5dd728/cloudflare-static/email-decode.min.js">
+<script data-cfasync="false" src="/cdn-cgi/scripts/5c5dd728/cloudflare-static/email-decode.min.js"></script>
+<script>
 // ── SMOOTH SCROLL with nav offset ────────────────────────────────────────────
 document.querySelectorAll('a[href^="#"]').forEach(anchor => {
   anchor.addEventListener('click', function(e) {
@@ -1058,8 +1059,6 @@ document.querySelectorAll('a[href^="#"]').forEach(anchor => {
     window.scrollTo({ top, behavior: 'smooth' });
   });
 });
-
-</script><script>
 
 // ── i18n INIT ─────────────────────────────────────────────
 
@@ -1489,5 +1488,38 @@ function downloadExcel(){
     const rr=results.filter(r=>r.factura===fn);
     rd2.push([fn,rr[0]?.fecha||'',rr[0]?.destino||'',rr.length,rr.reduce((s,r)=>s+(Number(r.cantidad)||0),0),rr.reduce((s,r)=>s+(Number(r.total)||0),0)]);
   });
-  rd2.push(['TOTAL',,,results.length,results.reduce((s,r)=>s+(Number(r.cantidad)||0),0),results.reduce((s,r)=>s+(Number(r.total)||0),0)]);
-  const ws
+  rd2.push(['TOTAL GENERAL', '', '', results.length, results.reduce((s,r)=>s+(Number(r.cantidad)||0),0), results.reduce((s,r)=>s+(Number(r.total)||0),0)]);
+  const ws2 = XLSX.utils.aoa_to_sheet(rd2);
+  ws2['!cols'] = [30,13,12,12,14,16].map(w => ({wch:w}));
+  XLSX.utils.book_append_sheet(wb, ws2, 'Resumen por factura');
+
+  // Sheet 3: Resumen por tipo
+  const tipos = [...new Set(results.map(r => r.tipo || 'Sin tipo'))].sort();
+  const rd3 = [['Tipo de producto','Nº líneas','Uds.','Importe total (€)']];
+  tipos.forEach(tipo => {
+    const rr = results.filter(r => (r.tipo || 'Sin tipo') === tipo);
+    rd3.push([
+      tipo,
+      rr.length,
+      rr.reduce((s,r)=>s+(Number(r.cantidad)||0),0),
+      rr.reduce((s,r)=>s+(Number(r.total)||0),0)
+    ]);
+  });
+  const ws3 = XLSX.utils.aoa_to_sheet(rd3);
+  ws3['!cols'] = [28,12,12,18].map(w => ({wch:w}));
+  XLSX.utils.book_append_sheet(wb, ws3, 'Resumen por tipo');
+
+  const productLabel = {
+    filtros: 'Filtros',
+    refrigeracion: 'Refrigeracion',
+    vehiculos: 'Vehiculos',
+    todo: 'Completo',
+    custom: 'Custom'
+  }[pt] || 'Facturas';
+
+  XLSX.writeFile(wb, `${productLabel}_MartinezHermanos_${year}.xlsx`);
+  log('ok', `✓ Excel descargado: ${productLabel}_MartinezHermanos_${year}.xlsx`);
+}
+</script>
+</body>
+</html>
