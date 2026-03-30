@@ -65,3 +65,25 @@ export async function extractPdfText(
     );
   }
 }
+
+export async function getPdfPageCount(
+  buffer: Buffer,
+  messages?: {
+    unreadable?: string;
+  }
+) {
+  try {
+    const document = await getDocument({
+      data: new Uint8Array(buffer),
+      isEvalSupported: false,
+      useSystemFonts: true
+    }).promise;
+
+    return Math.min(document.numPages, MAX_PDF_PAGES);
+  } catch {
+    throw new TypedPdfExtractionError(
+      'unreadable',
+      messages?.unreadable || 'No se pudo leer el PDF. Verifica que no esté corrupto.'
+    );
+  }
+}

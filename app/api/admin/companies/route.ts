@@ -15,11 +15,23 @@ function forbidden() {
   return NextResponse.json({ error: 'No autorizado.' }, { status: 401 });
 }
 
-function sanitizeCompany(company: { id: string; name: string; region?: string }) {
+function sanitizeCompany(company: {
+  id: string;
+  name: string;
+  region?: string;
+  creditsRemaining?: number;
+  creditUnit?: 'facturas' | 'paginas';
+}) {
   return {
     id: company.id,
     name: company.name,
-    region: company.region || ''
+    region: company.region || '',
+    creditsRemaining:
+      'creditsRemaining' in company && typeof company.creditsRemaining === 'number'
+        ? company.creditsRemaining
+        : 50,
+    creditUnit:
+      'creditUnit' in company && company.creditUnit ? company.creditUnit : 'facturas'
   };
 }
 
@@ -40,7 +52,14 @@ export async function POST(request: Request) {
   }
 
   const payload = (await request.json().catch(() => null)) as
-    | { id?: string; name?: string; region?: string; password?: string }
+    | {
+        id?: string;
+        name?: string;
+        region?: string;
+        password?: string;
+        creditsRemaining?: number;
+        creditUnit?: 'facturas' | 'paginas';
+      }
     | null;
 
   const name = payload?.name?.trim();
@@ -65,16 +84,22 @@ export async function POST(request: Request) {
 
   await upsertCompanyAccount({
     id,
-    name,
-    region: payload?.region?.trim() || '',
-    password: password || undefined
-  });
+      name,
+      region: payload?.region?.trim() || '',
+      password: password || undefined,
+      creditsRemaining:
+        typeof payload?.creditsRemaining === 'number' ? payload.creditsRemaining : undefined,
+      creditUnit: payload?.creditUnit || undefined
+    });
 
   return NextResponse.json({
     company: sanitizeCompany({
       id,
       name,
-      region: payload?.region?.trim() || ''
+      region: payload?.region?.trim() || '',
+      creditsRemaining:
+        typeof payload?.creditsRemaining === 'number' ? payload.creditsRemaining : 50,
+      creditUnit: payload?.creditUnit || 'facturas'
     })
   });
 }

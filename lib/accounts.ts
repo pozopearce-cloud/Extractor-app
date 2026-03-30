@@ -7,7 +7,9 @@ const fallbackAccounts: CompanyAccount[] = [
     id: 'demo',
     name: 'Demo Company',
     password: 'changeme',
-    region: 'Internal'
+    region: 'Internal',
+    creditsRemaining: 50,
+    creditUnit: 'facturas'
   }
 ];
 
@@ -45,7 +47,10 @@ function normalizeStoredAccount(account: CompanyAccount): CompanyAccount {
       id: account.id,
       name: account.name,
       region: account.region,
-      passwordHash: account.passwordHash
+      passwordHash: account.passwordHash,
+      creditsRemaining:
+        typeof account.creditsRemaining === 'number' ? account.creditsRemaining : 50,
+      creditUnit: account.creditUnit || 'facturas'
     };
   }
 
@@ -53,7 +58,10 @@ function normalizeStoredAccount(account: CompanyAccount): CompanyAccount {
     id: account.id,
     name: account.name,
     region: account.region,
-    passwordHash: hashPassword(account.password || 'changeme')
+    passwordHash: hashPassword(account.password || 'changeme'),
+    creditsRemaining:
+      typeof account.creditsRemaining === 'number' ? account.creditsRemaining : 50,
+    creditUnit: account.creditUnit || 'facturas'
   };
 }
 
@@ -87,7 +95,12 @@ export async function upsertCompanyAccount(account: CompanyAccount) {
       name: account.name,
       region: account.region,
       password: account.password || existing.password,
-      passwordHash: account.password ? undefined : existing.passwordHash
+      passwordHash: account.password ? undefined : existing.passwordHash,
+      creditsRemaining:
+        typeof account.creditsRemaining === 'number'
+          ? account.creditsRemaining
+          : existing.creditsRemaining,
+      creditUnit: account.creditUnit || existing.creditUnit
     };
   } else {
     accounts.unshift(account);
@@ -100,6 +113,31 @@ export async function removeCompanyAccount(id: string) {
   const accounts = await getCompanyAccounts();
   const next = accounts.filter((entry) => entry.id !== id);
   await saveCompanyAccounts(next);
+}
+
+export async function consumeCompanyCredits(id: string, amount: number) {
+  const accounts = await getCompanyAccounts();
+  const index = accounts.findIndex((entry) => entry.id === id);
+
+  if (index < 0) {
+    throw new Error('Empresa no encontrada.');
+  }
+
+  const company = accounts[index];
+  const remaining = typeof company.creditsRemaining === 'number' ? company.creditsRemaining : 50;
+
+  if (remaining < amount) {
+    throw new Error('Créditos insuficientes.');
+  }
+
+  accounts[index] = {
+    ...company,
+    creditsRemaining: remaining - amount
+  };
+
+  await saveCompanyAccounts(accounts);
+
+  return accounts[index];
 }
 
 export function slugifyCompanyId(value: string) {

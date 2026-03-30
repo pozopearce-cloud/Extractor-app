@@ -126,7 +126,9 @@ export async function getSessionCompany(): Promise<SessionCompany | null> {
   return {
     id: account.id,
     name: account.name,
-    region: account.region
+    region: account.region,
+    creditsRemaining: account.creditsRemaining,
+    creditUnit: account.creditUnit
   };
 }
 
@@ -151,6 +153,8 @@ export async function authenticateCompany(companyId: string, password: string) {
   return {
     id: account.id,
     name: account.name,
-    region: account.region
+    region: account.region,
+    creditsRemaining: account.creditsRemaining,
+    creditUnit: account.creditUnit
   };
 }

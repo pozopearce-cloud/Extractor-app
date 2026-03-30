@@ -29,7 +29,7 @@ import type {
   ProductType,
   YearMode
 } from '@/types/extractor';
-import type { HistoryRecord, SessionCompany } from '@/types/history';
+import type { CreditUnit, HistoryRecord, SessionCompany } from '@/types/history';
 
 type ClientFileStatus = {
   name: string;
@@ -73,11 +73,20 @@ export function ExtractorApp() {
   const [adminPassword, setAdminPassword] = useState('');
   const [adminError, setAdminError] = useState<string | null>(null);
   const [adminNotice, setAdminNotice] = useState<string | null>(null);
-  const [companyDraft, setCompanyDraft] = useState({
+  const [companyDraft, setCompanyDraft] = useState<{
+    id: string;
+    name: string;
+    region: string;
+    password: string;
+    creditsRemaining: number;
+    creditUnit: CreditUnit;
+  }>({
     id: '',
     name: '',
     region: '',
-    password: ''
+    password: '',
+    creditsRemaining: 50,
+    creditUnit: 'facturas'
   });
   const [companyId, setCompanyId] = useState('');
   const [password, setPassword] = useState('');
@@ -368,7 +377,14 @@ export function ExtractorApp() {
 
           await loadManagedCompanies();
           setAdminNotice(t.adminSuccessSave);
-          setCompanyDraft({ id: '', name: '', region: '', password: '' });
+          setCompanyDraft({
+            id: '',
+            name: '',
+            region: '',
+            password: '',
+            creditsRemaining: 50,
+            creditUnit: 'facturas'
+          });
         } catch (requestError) {
           setAdminError(requestError instanceof Error ? requestError.message : t.requestFailed);
         }
@@ -399,7 +415,14 @@ export function ExtractorApp() {
           await loadManagedCompanies();
           setAdminNotice(t.adminSuccessDelete);
           if (companyDraft.id === id) {
-            setCompanyDraft({ id: '', name: '', region: '', password: '' });
+            setCompanyDraft({
+              id: '',
+              name: '',
+              region: '',
+              password: '',
+              creditsRemaining: 50,
+              creditUnit: 'facturas'
+            });
           }
         } catch (requestError) {
           setAdminError(requestError instanceof Error ? requestError.message : t.requestFailed);
@@ -617,6 +640,11 @@ export function ExtractorApp() {
                     {sessionCompany.name}
                     {sessionCompany.region ? ` · ${sessionCompany.region}` : ''}
                   </div>
+                  <div className="hint">
+                    {typeof sessionCompany.creditsRemaining === 'number'
+                      ? `${sessionCompany.creditsRemaining} crédito(s) · ${sessionCompany.creditUnit || 'facturas'}`
+                      : null}
+                  </div>
                 </div>
                 <button type="button" className="button buttonSecondary" onClick={handleLogout}>
                   {t.authLogout}
@@ -710,6 +738,39 @@ export function ExtractorApp() {
                   />
                 </div>
                 <div className="field">
+                  <label htmlFor="adminCompanyCredits">Créditos disponibles</label>
+                  <input
+                    id="adminCompanyCredits"
+                    className="input"
+                    type="number"
+                    min="0"
+                    value={companyDraft.creditsRemaining}
+                    onChange={(event) =>
+                      setCompanyDraft((current) => ({
+                        ...current,
+                        creditsRemaining: Number(event.target.value || 0)
+                      }))
+                    }
+                  />
+                </div>
+                <div className="field">
+                  <label htmlFor="adminCompanyCreditUnit">Unidad de crédito</label>
+                  <select
+                    id="adminCompanyCreditUnit"
+                    className="select"
+                    value={companyDraft.creditUnit}
+                    onChange={(event) =>
+                      setCompanyDraft((current) => ({
+                        ...current,
+                        creditUnit: event.target.value as 'facturas' | 'paginas'
+                      }))
+                    }
+                  >
+                    <option value="facturas">Facturas</option>
+                    <option value="paginas">Páginas</option>
+                  </select>
+                </div>
+                <div className="field">
                   <label htmlFor="adminCompanyPassword">{t.adminCompanyPasswordLabel}</label>
                   <input
                     id="adminCompanyPassword"
@@ -742,7 +803,10 @@ export function ExtractorApp() {
                             <strong>{company.name}</strong>
                             <span className="hint">{company.id}</span>
                           </div>
-                          <span className="hint">{company.region || '-'}</span>
+                          <span className="hint">
+                            {company.region || '-'} · {company.creditsRemaining ?? 50} crédito(s) ·{' '}
+                            {company.creditUnit || 'facturas'}
+                          </span>
                           <div className="actions">
                             <button
                               type="button"
@@ -752,7 +816,11 @@ export function ExtractorApp() {
                                   id: company.id,
                                   name: company.name,
                                   region: company.region || '',
-                                  password: ''
+                                  password: '',
+                                  creditsRemaining: company.creditsRemaining ?? 50,
+                                  creditUnit: (company.creditUnit || 'facturas') as
+                                    | 'facturas'
+                                    | 'paginas'
                                 })
                               }
                             >

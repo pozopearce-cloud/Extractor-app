@@ -2,10 +2,15 @@ import { NextResponse } from 'next/server';
 
 import { requestClaudeJson, requestClaudeJsonFromPdf } from '@/lib/anthropic';
 import { getSessionCompany } from '@/lib/auth';
+import { consumeCompanyCredits } from '@/lib/accounts';
 import { getTranslations, normalizeLanguage } from '@/lib/i18n';
 import { appendHistoryRecord } from '@/lib/history-store';
 import { parseClaudeJson, normalizeClaudePayload } from '@/lib/normalize';
-import { extractPdfText, TypedPdfExtractionError } from '@/lib/pdf';
+import {
+  extractPdfText,
+  getPdfPageCount,
+  TypedPdfExtractionError
+} from '@/lib/pdf';
 import {
   buildDocumentExtractionPrompt,
   buildExtractionPrompt
@@ -46,14 +51,61 @@ export async function POST(request: Request) {
       fileTooLarge: i18n.validationFileTooLarge,
       customDescriptionRequired: i18n.serverCustomDescriptionRequired
     });
+    const fileBuffers = await Promise.all(
+      input.files.map(async (file) => ({
+        file,
+        buffer: Buffer.from(await file.arrayBuffer())
+      }))
+    );
+    const creditsNeededByFile = await Promise.all(
+      fileBuffers.map(async ({ file, buffer }) => {
+        if (company.creditUnit === 'paginas') {
+          const pages = await getPdfPageCount(buffer, {
+            unreadable: i18n.serverPdfUnreadable
+          });
+          return {
+            file,
+            buffer,
+            creditsNeeded: pages
+          };
+        }
+
+        return {
+          file,
+          buffer,
+          creditsNeeded: 1
+        };
+      })
+    );
+    const totalCreditsNeeded = creditsNeededByFile.reduce(
+      (sum, entry) => sum + entry.creditsNeeded,
+      0
+    );
+    const creditsRemaining =
+      typeof company.creditsRemaining === 'number' ? company.creditsRemaining : 50;
+
+    if (creditsRemaining < totalCreditsNeeded) {
+      return NextResponse.json(
+        {
+          error:
+            company.creditUnit === 'paginas'
+              ? `No tienes suficientes créditos. Este envío necesita ${totalCreditsNeeded} página(s) y te quedan ${creditsRemaining}.`
+              : `No tienes suficientes créditos. Este envío necesita ${totalCreditsNeeded} factura(s) y te quedan ${creditsRemaining}.`
+        },
+        {
+          status: 402,
+          headers: { 'Cache-Control': 'no-store' }
+        }
+      );
+    }
+
+    await consumeCompanyCredits(company.id, totalCreditsNeeded);
     const items: ExtractedLine[] = [];
     const files: ExtractResponseFile[] = [];
 
-    for (const file of input.files) {
+    for (const { file, buffer } of creditsNeededByFile) {
       try {
         console.info('[extract] processing file', { name: file.name, size: file.size });
-
-        const buffer = Buffer.from(await file.arrayBuffer());
         let rawResponse = '';
 
         try {
