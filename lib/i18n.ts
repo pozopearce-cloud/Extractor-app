@@ -26,6 +26,21 @@ type UiTranslations = {
   buttonExtracting: string;
   buttonDownload: string;
   buttonClear: string;
+  authTitle: string;
+  authSubtitle: string;
+  authCompanyLabel: string;
+  authPasswordLabel: string;
+  authPasswordPlaceholder: string;
+  authButton: string;
+  authLoading: string;
+  authLogout: string;
+  authInvalid: string;
+  authNoSession: string;
+  authCurrentCompany: string;
+  historyTitle: string;
+  historySubtitle: string;
+  historyEmpty: string;
+  historyFiles: string;
   statsFacturas: string;
   statsLineas: string;
   statsUnidades: string;
@@ -135,6 +150,21 @@ export const translations: Record<AppLanguage, UiTranslations> = {
     buttonExtracting: 'Extrayendo...',
     buttonDownload: 'Descargar Excel',
     buttonClear: 'Limpiar',
+    authTitle: 'Acceso por empresa',
+    authSubtitle: 'Cada empresa accede con su propia contraseña y ve solo su historial.',
+    authCompanyLabel: 'Empresa',
+    authPasswordLabel: 'Contraseña',
+    authPasswordPlaceholder: 'Introduce la contraseña',
+    authButton: 'Entrar',
+    authLoading: 'Cargando sesión...',
+    authLogout: 'Cerrar sesión',
+    authInvalid: 'Credenciales incorrectas.',
+    authNoSession: 'Debes iniciar sesión para extraer y ver el historial.',
+    authCurrentCompany: 'Empresa activa',
+    historyTitle: 'Historial',
+    historySubtitle: 'Extracciones recientes guardadas para esta empresa.',
+    historyEmpty: 'Todavía no hay extracciones guardadas para esta empresa.',
+    historyFiles: 'Archivos',
     statsFacturas: 'Facturas',
     statsLineas: 'Líneas',
     statsUnidades: 'Unidades',
@@ -232,6 +262,21 @@ export const translations: Record<AppLanguage, UiTranslations> = {
     buttonExtracting: 'Extracting...',
     buttonDownload: 'Download Excel',
     buttonClear: 'Clear',
+    authTitle: 'Company access',
+    authSubtitle: 'Each company signs in with its own password and only sees its own history.',
+    authCompanyLabel: 'Company',
+    authPasswordLabel: 'Password',
+    authPasswordPlaceholder: 'Enter password',
+    authButton: 'Sign in',
+    authLoading: 'Loading session...',
+    authLogout: 'Sign out',
+    authInvalid: 'Invalid credentials.',
+    authNoSession: 'You must sign in to extract files and view history.',
+    authCurrentCompany: 'Active company',
+    historyTitle: 'History',
+    historySubtitle: 'Recent extractions saved for this company.',
+    historyEmpty: 'There are no saved extractions for this company yet.',
+    historyFiles: 'Files',
     statsFacturas: 'Invoices',
     statsLineas: 'Lines',
     statsUnidades: 'Units',
@@ -329,6 +374,21 @@ export const translations: Record<AppLanguage, UiTranslations> = {
     buttonExtracting: 'Extraction...',
     buttonDownload: 'Télécharger Excel',
     buttonClear: 'Effacer',
+    authTitle: 'Accès par entreprise',
+    authSubtitle: 'Chaque entreprise se connecte avec son propre mot de passe et ne voit que son historique.',
+    authCompanyLabel: 'Entreprise',
+    authPasswordLabel: 'Mot de passe',
+    authPasswordPlaceholder: 'Entrez le mot de passe',
+    authButton: 'Se connecter',
+    authLoading: 'Chargement de la session...',
+    authLogout: 'Se déconnecter',
+    authInvalid: 'Identifiants incorrects.',
+    authNoSession: 'Vous devez vous connecter pour extraire des fichiers et voir l’historique.',
+    authCurrentCompany: 'Entreprise active',
+    historyTitle: 'Historique',
+    historySubtitle: 'Extractions récentes enregistrées pour cette entreprise.',
+    historyEmpty: 'Aucune extraction enregistrée pour cette entreprise pour le moment.',
+    historyFiles: 'Fichiers',
     statsFacturas: 'Factures',
     statsLineas: 'Lignes',
     statsUnidades: 'Unités',
@@ -426,6 +486,21 @@ export const translations: Record<AppLanguage, UiTranslations> = {
     buttonExtracting: '提取中...',
     buttonDownload: '下载 Excel',
     buttonClear: '清空',
+    authTitle: '企业登录',
+    authSubtitle: '每家公司使用自己的密码登录，只能看到自己的历史记录。',
+    authCompanyLabel: '公司',
+    authPasswordLabel: '密码',
+    authPasswordPlaceholder: '输入密码',
+    authButton: '登录',
+    authLoading: '正在加载会话...',
+    authLogout: '退出登录',
+    authInvalid: '凭据不正确。',
+    authNoSession: '你必须先登录，才能提取文件并查看历史记录。',
+    authCurrentCompany: '当前企业',
+    historyTitle: '历史记录',
+    historySubtitle: '该企业最近保存的提取记录。',
+    historyEmpty: '该企业还没有保存的提取记录。',
+    historyFiles: '文件',
     statsFacturas: '发票数',
     statsLineas: '行数',
     statsUnidades: '数量',

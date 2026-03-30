@@ -1,7 +1,9 @@
 import { NextResponse } from 'next/server';
 
 import { requestClaudeJson, requestClaudeJsonFromPdf } from '@/lib/anthropic';
+import { getSessionCompany } from '@/lib/auth';
 import { getTranslations, normalizeLanguage } from '@/lib/i18n';
+import { appendHistoryRecord } from '@/lib/history-store';
 import { parseClaudeJson, normalizeClaudePayload } from '@/lib/normalize';
 import { extractPdfText, TypedPdfExtractionError } from '@/lib/pdf';
 import {
@@ -23,6 +25,17 @@ export async function POST(request: Request) {
   let language = normalizeLanguage('es');
 
   try {
+    const company = await getSessionCompany();
+    if (!company) {
+      return NextResponse.json(
+        { error: 'No autenticado.' },
+        {
+          status: 401,
+          headers: { 'Cache-Control': 'no-store' }
+        }
+      );
+    }
+
     const formData = await request.formData();
     language = normalizeLanguage(formData.get('language'));
     const i18n = getTranslations(language);
@@ -116,6 +129,19 @@ export async function POST(request: Request) {
       files,
       summary: buildSummary(items)
     };
+
+    await appendHistoryRecord({
+      id: crypto.randomUUID(),
+      companyId: company.id,
+      companyName: company.name,
+      createdAt: new Date().toISOString(),
+      productType: input.productType,
+      yearMode: input.yearMode,
+      currency: input.currency,
+      sourceFiles: input.files.map((file) => file.name),
+      summary: payload.summary,
+      items
+    });
 
     return NextResponse.json(payload, {
       headers: {

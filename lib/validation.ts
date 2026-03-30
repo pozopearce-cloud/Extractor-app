@@ -8,6 +8,7 @@ import {
 import { DEFAULT_LANGUAGE, normalizeLanguage } from '@/lib/i18n';
 import type {
   AppLanguage,
+  CurrencyCode,
   ExportRequest,
   ProductType,
   YearMode
@@ -50,6 +51,7 @@ export interface ValidatedExtractInput {
   productType: ProductType;
   customDescription?: string;
   yearMode: YearMode;
+  currency: CurrencyCode;
   files: File[];
 }
 
@@ -66,6 +68,7 @@ export function validateExtractFormData(
   const language = normalizeLanguage(formData.get('language') || DEFAULT_LANGUAGE);
   const productType = productTypeSchema.parse(formData.get('productType'));
   const yearMode = yearModeSchema.parse(formData.get('yearMode'));
+  const currency = z.enum(['EUR', 'XAF', 'XOF']).parse(formData.get('currency') || 'EUR');
   const customDescription = String(formData.get('customDescription') || '').trim();
   const files = formData
     .getAll('files')
@@ -112,6 +115,7 @@ export function validateExtractFormData(
     productType,
     customDescription: customDescription || undefined,
     yearMode,
+    currency,
     files
   };
 }

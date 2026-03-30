@@ -14,6 +14,9 @@ Usa `.env.local`:
 ```bash
 ANTHROPIC_API_KEY=tu_clave
 ANTHROPIC_MODEL=claude-3-5-sonnet-latest
+AUTH_SECRET=una_clave_larga_y_privada
+CLIENT_ACCOUNTS_JSON=[{"id":"martinez","name":"Martinez Hermanos","password":"supersecreta","region":"España"},{"id":"bata-logistics","name":"Bata Logistics","password":"otra-clave","region":"Guinea Ecuatorial"}]
+BLOB_READ_WRITE_TOKEN=opcional_para_vercel_blob
 ```
 
 ## Desarrollo local
@@ -55,9 +58,11 @@ Notas:
 
 - Sube hasta 5 PDFs
 - Máximo 10 MB por archivo
-- Solo PDFs con texto embebido
+- PDFs con texto embebido o escaneados
 - Procesamiento secuencial en servidor
 - Exportación Excel en tres hojas
+- Acceso por empresa con contraseña
+- Historial por empresa
 
 ## Endpoints
 

@@ -29,6 +29,7 @@ import type {
   ProductType,
   YearMode
 } from '@/types/extractor';
+import type { HistoryRecord, SessionCompany } from '@/types/history';
 
 type ClientFileStatus = {
   name: string;
@@ -63,6 +64,13 @@ export function ExtractorApp() {
   const [language, setLanguage] = useState<AppLanguage>(DEFAULT_LANGUAGE);
   const [currency, setCurrency] = useState<CurrencyCode>(DEFAULT_CURRENCY);
   const [selectedFiles, setSelectedFiles] = useState<File[]>([]);
+  const [sessionCompany, setSessionCompany] = useState<SessionCompany | null>(null);
+  const [companies, setCompanies] = useState<SessionCompany[]>([]);
+  const [history, setHistory] = useState<HistoryRecord[]>([]);
+  const [companyId, setCompanyId] = useState('');
+  const [password, setPassword] = useState('');
+  const [authError, setAuthError] = useState<string | null>(null);
+  const [isSessionLoading, setIsSessionLoading] = useState(true);
   const [productType, setProductType] = useState<ProductType>('filtros');
   const [yearMode, setYearMode] = useState<YearMode>('auto');
   const [customDescription, setCustomDescription] = useState('');
@@ -86,6 +94,29 @@ export function ExtractorApp() {
   useEffect(() => {
     const storedLanguage = normalizeLanguage(window.localStorage.getItem('extractor_language'));
     setLanguage(storedLanguage);
+  }, []);
+
+  useEffect(() => {
+    void (async () => {
+      setIsSessionLoading(true);
+      try {
+        const response = await fetch('/api/auth/session', { cache: 'no-store' });
+        const payload = (await response.json()) as {
+          session: SessionCompany | null;
+          companies: SessionCompany[];
+        };
+        setSessionCompany(payload.session);
+        setCompanies(payload.companies);
+        setCompanyId(payload.session?.id || payload.companies[0]?.id || '');
+        if (payload.session) {
+          const historyResponse = await fetch('/api/history', { cache: 'no-store' });
+          const historyPayload = (await historyResponse.json()) as { records?: HistoryRecord[] };
+          setHistory(historyPayload.records || []);
+        }
+      } finally {
+        setIsSessionLoading(false);
+      }
+    })();
   }, []);
 
   useEffect(() => {
@@ -215,7 +246,49 @@ export function ExtractorApp() {
     setError(null);
   }
 
+  async function handleLogin() {
+    setAuthError(null);
+    const response = await fetch('/api/auth/login', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify({
+        companyId,
+        password
+      })
+    });
+
+    const payload = (await response.json()) as {
+      session?: SessionCompany;
+      error?: string;
+    };
+
+    if (!response.ok || !payload.session) {
+      setAuthError(payload.error || t.authInvalid);
+      return;
+    }
+
+    setSessionCompany(payload.session);
+    setPassword('');
+    const historyResponse = await fetch('/api/history', { cache: 'no-store' });
+    const historyPayload = (await historyResponse.json()) as { records?: HistoryRecord[] };
+    setHistory(historyPayload.records || []);
+  }
+
+  async function handleLogout() {
+    await fetch('/api/auth/logout', { method: 'POST' });
+    setSessionCompany(null);
+    setHistory([]);
+    setPassword('');
+  }
+
   async function handleExtract() {
+    if (!sessionCompany) {
+      setError(t.authNoSession);
+      return;
+    }
+
     if (!selectedFiles.length) {
       setError(t.validationNoFiles);
       return;
@@ -287,6 +360,9 @@ export function ExtractorApp() {
             );
           });
           appendLog(t.logCompleted(payload.summary.lineas, selectedFiles.length));
+          const historyResponse = await fetch('/api/history', { cache: 'no-store' });
+          const historyPayload = (await historyResponse.json()) as { records?: HistoryRecord[] };
+          setHistory(historyPayload.records || []);
         } catch (requestError) {
           resetProgressLoop();
           const message =
@@ -403,6 +479,61 @@ export function ExtractorApp() {
 
       <section className="grid">
         <aside className="card panel stack">
+          <div>
+            <h2 className="panelTitle">{t.authTitle}</h2>
+            <p className="panelSubtitle">{t.authSubtitle}</p>
+            {isSessionLoading ? (
+              <div className="hint">{t.authLoading}</div>
+            ) : sessionCompany ? (
+              <div className="stack">
+                <div className="limitBox">
+                  <strong>{t.authCurrentCompany}</strong>
+                  <div className="hint">
+                    {sessionCompany.name}
+                    {sessionCompany.region ? ` · ${sessionCompany.region}` : ''}
+                  </div>
+                </div>
+                <button type="button" className="button buttonSecondary" onClick={handleLogout}>
+                  {t.authLogout}
+                </button>
+              </div>
+            ) : (
+              <div className="stack">
+                <div className="field">
+                  <label htmlFor="company">{t.authCompanyLabel}</label>
+                  <select
+                    id="company"
+                    className="select"
+                    value={companyId}
+                    onChange={(event) => setCompanyId(event.target.value)}
+                  >
+                    {companies.map((company) => (
+                      <option key={company.id} value={company.id}>
+                        {company.name}
+                        {company.region ? ` · ${company.region}` : ''}
+                      </option>
+                    ))}
+                  </select>
+                </div>
+                <div className="field">
+                  <label htmlFor="password">{t.authPasswordLabel}</label>
+                  <input
+                    id="password"
+                    className="input"
+                    type="password"
+                    placeholder={t.authPasswordPlaceholder}
+                    value={password}
+                    onChange={(event) => setPassword(event.target.value)}
+                  />
+                </div>
+                {authError ? <div className="errorBox">{authError}</div> : null}
+                <button type="button" className="button buttonPrimary" onClick={handleLogin}>
+                  {t.authButton}
+                </button>
+              </div>
+            )}
+          </div>
+
           <div>
             <h2 className="panelTitle">{t.configurationTitle}</h2>
             <p className="panelSubtitle">{t.configurationSubtitle}</p>
@@ -549,6 +680,34 @@ export function ExtractorApp() {
                 {formatCurrencyValue(effectiveSummary.total, locale, currency)}
               </div>
             </div>
+          </div>
+
+          <div className="card panel">
+            <h2 className="panelTitle">{t.historyTitle}</h2>
+            <p className="panelSubtitle">{t.historySubtitle}</p>
+            {history.length ? (
+              <div className="fileList">
+                {history.map((record) => (
+                  <article key={record.id} className="fileItem">
+                    <div className="fileRow">
+                      <strong>{new Date(record.createdAt).toLocaleString(locale)}</strong>
+                      <span className="badge badge_done">
+                        {formatCount(record.summary.lineas, locale)} {t.statsLineas}
+                      </span>
+                    </div>
+                    <span className="hint">
+                      {record.sourceFiles.join(', ')}
+                    </span>
+                    <span className="hint">
+                      {t.historyFiles}: {record.sourceFiles.length} · {t.statsTotal}:{' '}
+                      {formatCurrencyValue(record.summary.total, locale, record.currency)}
+                    </span>
+                  </article>
+                ))}
+              </div>
+            ) : (
+              <div className="emptyState">{t.historyEmpty}</div>
+            )}
           </div>
 
           <div className="card panel">
