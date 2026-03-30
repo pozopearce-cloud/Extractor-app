@@ -129,6 +129,22 @@ export function ExtractorApp() {
     setManagedCompanies(payload.companies || []);
   }
 
+  async function handleAdminRefresh() {
+    setAdminError(null);
+    setAdminNotice(null);
+
+    startAdminTransition(() => {
+      void (async () => {
+        try {
+          await loadManagedCompanies();
+          setAdminNotice(t.adminSuccessRefresh);
+        } catch (requestError) {
+          setAdminError(requestError instanceof Error ? requestError.message : t.requestFailed);
+        }
+      })();
+    });
+  }
+
   useEffect(() => {
     void (async () => {
       setIsSessionLoading(true);
@@ -697,9 +713,10 @@ export function ExtractorApp() {
                 <button
                   type="button"
                   className="button buttonSecondary"
-                  onClick={() => void loadManagedCompanies()}
+                  disabled={isAdminPending}
+                  onClick={handleAdminRefresh}
                 >
-                  {t.adminRefreshButton}
+                  {isAdminPending ? `${t.adminRefreshButton}...` : t.adminRefreshButton}
                 </button>
                 <button type="button" className="button buttonSecondary" onClick={handleAdminLogout}>
                   {t.adminLogoutButton}

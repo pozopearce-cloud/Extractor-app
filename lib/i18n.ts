@@ -57,6 +57,7 @@ type UiTranslations = {
   adminEmpty: string;
   adminSuccessSave: string;
   adminSuccessDelete: string;
+  adminSuccessRefresh: string;
   historyTitle: string;
   historySubtitle: string;
   historyEmpty: string;
@@ -202,6 +203,7 @@ export const translations: Record<AppLanguage, UiTranslations> = {
     adminEmpty: 'Todavía no hay empresas gestionadas.',
     adminSuccessSave: 'Empresa guardada correctamente.',
     adminSuccessDelete: 'Empresa eliminada correctamente.',
+    adminSuccessRefresh: 'Lista de empresas actualizada.',
     historyTitle: 'Historial',
     historySubtitle: 'Extracciones recientes guardadas para esta empresa.',
     historyEmpty: 'Todavía no hay extracciones guardadas para esta empresa.',
@@ -335,6 +337,7 @@ export const translations: Record<AppLanguage, UiTranslations> = {
     adminEmpty: 'No managed companies yet.',
     adminSuccessSave: 'Company saved successfully.',
     adminSuccessDelete: 'Company deleted successfully.',
+    adminSuccessRefresh: 'Company list refreshed.',
     historyTitle: 'History',
     historySubtitle: 'Recent extractions saved for this company.',
     historyEmpty: 'There are no saved extractions for this company yet.',
@@ -468,6 +471,7 @@ export const translations: Record<AppLanguage, UiTranslations> = {
     adminEmpty: 'Aucune entreprise gérée pour le moment.',
     adminSuccessSave: 'Entreprise enregistrée.',
     adminSuccessDelete: 'Entreprise supprimée.',
+    adminSuccessRefresh: 'Liste des entreprises actualisée.',
     historyTitle: 'Historique',
     historySubtitle: 'Extractions récentes enregistrées pour cette entreprise.',
     historyEmpty: 'Aucune extraction enregistrée pour cette entreprise pour le moment.',
@@ -600,6 +604,7 @@ export const translations: Record<AppLanguage, UiTranslations> = {
     adminEmpty: '还没有可管理的企业。',
     adminSuccessSave: '企业已保存。',
     adminSuccessDelete: '企业已删除。',
+    adminSuccessRefresh: '企业列表已刷新。',
     historyTitle: '历史记录',
     historySubtitle: '该企业最近保存的提取记录。',
     historyEmpty: '该企业还没有保存的提取记录。',
