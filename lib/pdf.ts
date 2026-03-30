@@ -3,6 +3,14 @@ import { getDocument } from 'pdfjs-dist/legacy/build/pdf.mjs';
 import { MAX_PDF_PAGES } from '@/lib/constants';
 
 export class PdfExtractionError extends Error {}
+export class TypedPdfExtractionError extends Error {
+  code: 'no_text' | 'unreadable';
+
+  constructor(code: 'no_text' | 'unreadable', message: string) {
+    super(message);
+    this.code = code;
+  }
+}
 
 export async function extractPdfText(
   buffer: Buffer,
@@ -35,7 +43,8 @@ export async function extractPdfText(
     const normalized = text.trim();
 
     if (!normalized) {
-      throw new PdfExtractionError(
+      throw new TypedPdfExtractionError(
+        'no_text',
         messages?.noText ||
           'No se pudo extraer texto legible del PDF. Esta versión no soporta OCR.'
       );
@@ -46,11 +55,12 @@ export async function extractPdfText(
       pagesRead: pagesToRead
     };
   } catch (error) {
-    if (error instanceof PdfExtractionError) {
+    if (error instanceof TypedPdfExtractionError) {
       throw error;
     }
 
-    throw new PdfExtractionError(
+    throw new TypedPdfExtractionError(
+      'unreadable',
       messages?.unreadable || 'No se pudo leer el PDF. Verifica que no esté corrupto.'
     );
   }

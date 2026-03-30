@@ -1,4 +1,5 @@
 import Anthropic from '@anthropic-ai/sdk';
+import type { MessageParam } from '@anthropic-ai/sdk/resources/messages/messages';
 
 import { ANTHROPIC_TIMEOUT_MS } from '@/lib/constants';
 
@@ -25,8 +26,8 @@ export function getAnthropicModel() {
   return process.env.ANTHROPIC_MODEL || 'claude-3-5-sonnet-latest';
 }
 
-export async function requestClaudeJson(
-  prompt: string,
+async function createMessage(
+  inputMessages: MessageParam[],
   messages?: {
     configInvalid?: string;
     rateLimited?: string;
@@ -39,12 +40,7 @@ export async function requestClaudeJson(
     const response = await anthropic.messages.create({
       model: getAnthropicModel(),
       max_tokens: 4096,
-      messages: [
-        {
-          role: 'user',
-          content: prompt
-        }
-      ]
+      messages: inputMessages
     });
 
     const text = response.content
@@ -78,4 +74,56 @@ export async function requestClaudeJson(
 
     throw new Error(messages?.failed || 'No se pudo completar la extracción con Claude.');
   }
+}
+
+export async function requestClaudeJson(
+  prompt: string,
+  messages?: {
+    configInvalid?: string;
+    rateLimited?: string;
+    failed?: string;
+  }
+) {
+  return createMessage(
+    [
+      {
+        role: 'user',
+        content: prompt
+      }
+    ],
+    messages
+  );
+}
+
+export async function requestClaudeJsonFromPdf(
+  pdfBuffer: Buffer,
+  prompt: string,
+  messages?: {
+    configInvalid?: string;
+    rateLimited?: string;
+    failed?: string;
+  }
+) {
+  return createMessage(
+    [
+      {
+        role: 'user',
+        content: [
+          {
+            type: 'document',
+            source: {
+              type: 'base64',
+              media_type: 'application/pdf',
+              data: pdfBuffer.toString('base64')
+            }
+          },
+          {
+            type: 'text',
+            text: prompt
+          }
+        ]
+      }
+    ],
+    messages
+  );
 }

@@ -1,10 +1,13 @@
 import { NextResponse } from 'next/server';
 
-import { requestClaudeJson } from '@/lib/anthropic';
+import { requestClaudeJson, requestClaudeJsonFromPdf } from '@/lib/anthropic';
 import { getTranslations, normalizeLanguage } from '@/lib/i18n';
 import { parseClaudeJson, normalizeClaudePayload } from '@/lib/normalize';
-import { extractPdfText, PdfExtractionError } from '@/lib/pdf';
-import { buildExtractionPrompt } from '@/lib/prompts';
+import { extractPdfText, TypedPdfExtractionError } from '@/lib/pdf';
+import {
+  buildDocumentExtractionPrompt,
+  buildExtractionPrompt
+} from '@/lib/prompts';
 import { buildSummary } from '@/lib/summary';
 import {
   validateExtractFormData,
@@ -38,21 +41,41 @@ export async function POST(request: Request) {
         console.info('[extract] processing file', { name: file.name, size: file.size });
 
         const buffer = Buffer.from(await file.arrayBuffer());
-        const pdf = await extractPdfText(buffer, {
-          noText: i18n.serverPdfNoText,
-          unreadable: i18n.serverPdfUnreadable
-        });
-        const prompt = buildExtractionPrompt({
-          productType: input.productType,
-          customDescription: input.customDescription,
-          filename: file.name,
-          text: pdf.text
-        });
-        const rawResponse = await requestClaudeJson(prompt, {
-          configInvalid: i18n.serverClaudeConfigInvalid,
-          rateLimited: i18n.serverClaudeRateLimited,
-          failed: i18n.serverClaudeFailed
-        });
+        let rawResponse = '';
+
+        try {
+          const pdf = await extractPdfText(buffer, {
+            noText: i18n.serverPdfNoText,
+            unreadable: i18n.serverPdfUnreadable
+          });
+          const prompt = buildExtractionPrompt({
+            productType: input.productType,
+            customDescription: input.customDescription,
+            filename: file.name,
+            text: pdf.text
+          });
+          rawResponse = await requestClaudeJson(prompt, {
+            configInvalid: i18n.serverClaudeConfigInvalid,
+            rateLimited: i18n.serverClaudeRateLimited,
+            failed: i18n.serverClaudeFailed
+          });
+        } catch (error) {
+          if (!(error instanceof TypedPdfExtractionError) || error.code !== 'no_text') {
+            throw error;
+          }
+
+          const prompt = buildDocumentExtractionPrompt({
+            productType: input.productType,
+            customDescription: input.customDescription,
+            filename: file.name
+          });
+          rawResponse = await requestClaudeJsonFromPdf(buffer, prompt, {
+            configInvalid: i18n.serverClaudeConfigInvalid,
+            rateLimited: i18n.serverClaudeRateLimited,
+            failed: i18n.serverClaudeFailed
+          });
+        }
+
         const parsed = parseClaudeJson(rawResponse, i18n.serverClaudeInvalidJson);
         const normalized = normalizeClaudePayload(
           parsed,
@@ -68,7 +91,7 @@ export async function POST(request: Request) {
         });
       } catch (error) {
         const message =
-          error instanceof PdfExtractionError
+          error instanceof TypedPdfExtractionError
             ? error.message
             : error instanceof Error
               ? error.message

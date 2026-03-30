@@ -106,3 +106,45 @@ Texto de la factura (${filename}):
 ${text.slice(0, 12_000)}
 ---`;
 }
+
+export function buildDocumentExtractionPrompt({
+  productType,
+  customDescription,
+  filename
+}: Omit<PromptContext, 'text'>) {
+  const config = productConfigs[productType];
+
+  return `Eres un ${config.role(customDescription)}.
+
+Analiza el PDF adjunto de la factura "${filename}" y extrae TODOS los artículos que sean: ${config.what(customDescription)}.
+Ignora: ${config.ignore}.
+
+Lee tanto el texto como el contenido visual del PDF si fuera necesario.
+
+Instrucciones de extracción:
+- El número de factura suele aparecer al principio del documento.
+- La fecha aparece cerca del número de factura.
+- El destino suele ser BATA, MALABO, u otro lugar indicado en el documento.
+- El tipo debe describir la categoría del producto (${config.typeExample(customDescription)}).
+- El modelo es la referencia del fabricante o la referencia comercial del producto.
+- La ref_interna es el código que aparece al inicio de cada línea de producto, si existe.
+- Si un campo no aparece, usa cadena vacía.
+- Si cantidad, precio_unitario o total no aparecen claramente, usa 0.
+
+Responde ÚNICAMENTE con un array JSON válido, sin texto adicional ni bloques markdown:
+[
+  {
+    "factura": "Factura_X-XXXX/XX",
+    "fecha": "DD/MM/AAAA",
+    "destino": "BATA",
+    "ref_interna": "CMF9015",
+    "tipo": "FILTRO DE COMBUSTIBLE",
+    "modelo": "WK828X",
+    "cantidad": 20,
+    "precio_unitario": 5.79,
+    "total": 115.75
+  }
+]
+
+Si no hay productos que coincidan, devuelve [].`;
+}
