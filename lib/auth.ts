@@ -3,12 +3,18 @@ import { createHmac, timingSafeEqual } from 'node:crypto';
 import { cookies } from 'next/headers';
 
 import { getCompanyAccountById, getCompanyAccounts } from '@/lib/accounts';
+import { verifyPasswordHash } from '@/lib/passwords';
 import type { SessionCompany } from '@/types/history';
 
 const SESSION_COOKIE = 'extractor_session';
+const ADMIN_COOKIE = 'extractor_admin';
 
 function getAuthSecret() {
   return process.env.AUTH_SECRET || 'dev-auth-secret-change-me';
+}
+
+function getAdminPassword() {
+  return process.env.ADMIN_PASSWORD || '';
 }
 
 function sign(value: string) {
@@ -70,6 +76,35 @@ export async function clearSessionCookie() {
   cookieStore.delete(SESSION_COOKIE);
 }
 
+export async function setAdminCookie() {
+  const cookieStore = await cookies();
+  cookieStore.set(ADMIN_COOKIE, sign('admin'), {
+    httpOnly: true,
+    sameSite: 'lax',
+    secure: process.env.NODE_ENV === 'production',
+    path: '/',
+    maxAge: 60 * 60 * 24 * 30
+  });
+}
+
+export async function clearAdminCookie() {
+  const cookieStore = await cookies();
+  cookieStore.delete(ADMIN_COOKIE);
+}
+
+export function isAdminConfigured() {
+  return Boolean(getAdminPassword());
+}
+
+export function verifyAdminPassword(password: string) {
+  return Boolean(password) && password === getAdminPassword();
+}
+
+export async function hasAdminSession() {
+  const cookieStore = await cookies();
+  return cookieStore.get(ADMIN_COOKIE)?.value === sign('admin');
+}
+
 export async function getSessionCompany(): Promise<SessionCompany | null> {
   const cookieStore = await cookies();
   const token = cookieStore.get(SESSION_COOKIE)?.value;
@@ -83,7 +118,7 @@ export async function getSessionCompany(): Promise<SessionCompany | null> {
     return null;
   }
 
-  const account = getCompanyAccountById(decoded.companyId);
+  const account = await getCompanyAccountById(decoded.companyId);
   if (!account) {
     return null;
   }
@@ -95,10 +130,19 @@ export async function getSessionCompany(): Promise<SessionCompany | null> {
   };
 }
 
-export function authenticateCompany(companyId: string, password: string) {
-  const account = getCompanyAccounts().find(
-    (entry) => entry.id === companyId && entry.password === password
-  );
+export async function authenticateCompany(companyId: string, password: string) {
+  const accounts = await getCompanyAccounts();
+  const account = accounts.find((entry) => {
+    if (entry.id !== companyId) {
+      return false;
+    }
+
+    if (entry.passwordHash) {
+      return verifyPasswordHash(password, entry.passwordHash);
+    }
+
+    return entry.password === password;
+  });
 
   if (!account) {
     return null;

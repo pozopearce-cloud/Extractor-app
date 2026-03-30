@@ -37,6 +37,26 @@ type UiTranslations = {
   authInvalid: string;
   authNoSession: string;
   authCurrentCompany: string;
+  adminTitle: string;
+  adminSubtitle: string;
+  adminPasswordLabel: string;
+  adminPasswordPlaceholder: string;
+  adminLoginButton: string;
+  adminLogoutButton: string;
+  adminDisabled: string;
+  adminCompaniesTitle: string;
+  adminCompanyIdLabel: string;
+  adminCompanyNameLabel: string;
+  adminCompanyRegionLabel: string;
+  adminCompanyPasswordLabel: string;
+  adminCompanyPasswordPlaceholder: string;
+  adminSaveButton: string;
+  adminDeleteButton: string;
+  adminEditButton: string;
+  adminRefreshButton: string;
+  adminEmpty: string;
+  adminSuccessSave: string;
+  adminSuccessDelete: string;
   historyTitle: string;
   historySubtitle: string;
   historyEmpty: string;
@@ -161,6 +181,27 @@ export const translations: Record<AppLanguage, UiTranslations> = {
     authInvalid: 'Credenciales incorrectas.',
     authNoSession: 'Debes iniciar sesión para extraer y ver el historial.',
     authCurrentCompany: 'Empresa activa',
+    adminTitle: 'Administración',
+    adminSubtitle: 'Gestiona empresas y contraseñas desde la propia app.',
+    adminPasswordLabel: 'Contraseña admin',
+    adminPasswordPlaceholder: 'Introduce la contraseña maestra',
+    adminLoginButton: 'Entrar como admin',
+    adminLogoutButton: 'Salir de admin',
+    adminDisabled: 'El acceso admin todavía no está configurado.',
+    adminCompaniesTitle: 'Empresas',
+    adminCompanyIdLabel: 'Identificador',
+    adminCompanyNameLabel: 'Nombre de empresa',
+    adminCompanyRegionLabel: 'Región',
+    adminCompanyPasswordLabel: 'Nueva contraseña',
+    adminCompanyPasswordPlaceholder:
+      'Solo rellena este campo si quieres crear o cambiar la contraseña',
+    adminSaveButton: 'Guardar empresa',
+    adminDeleteButton: 'Eliminar',
+    adminEditButton: 'Editar',
+    adminRefreshButton: 'Recargar',
+    adminEmpty: 'Todavía no hay empresas gestionadas.',
+    adminSuccessSave: 'Empresa guardada correctamente.',
+    adminSuccessDelete: 'Empresa eliminada correctamente.',
     historyTitle: 'Historial',
     historySubtitle: 'Extracciones recientes guardadas para esta empresa.',
     historyEmpty: 'Todavía no hay extracciones guardadas para esta empresa.',
@@ -273,6 +314,27 @@ export const translations: Record<AppLanguage, UiTranslations> = {
     authInvalid: 'Invalid credentials.',
     authNoSession: 'You must sign in to extract files and view history.',
     authCurrentCompany: 'Active company',
+    adminTitle: 'Admin',
+    adminSubtitle: 'Manage companies and passwords from the app.',
+    adminPasswordLabel: 'Admin password',
+    adminPasswordPlaceholder: 'Enter the master password',
+    adminLoginButton: 'Admin login',
+    adminLogoutButton: 'Admin logout',
+    adminDisabled: 'Admin access is not configured yet.',
+    adminCompaniesTitle: 'Companies',
+    adminCompanyIdLabel: 'Identifier',
+    adminCompanyNameLabel: 'Company name',
+    adminCompanyRegionLabel: 'Region',
+    adminCompanyPasswordLabel: 'New password',
+    adminCompanyPasswordPlaceholder:
+      'Only fill this in to create or rotate the password',
+    adminSaveButton: 'Save company',
+    adminDeleteButton: 'Delete',
+    adminEditButton: 'Edit',
+    adminRefreshButton: 'Refresh',
+    adminEmpty: 'No managed companies yet.',
+    adminSuccessSave: 'Company saved successfully.',
+    adminSuccessDelete: 'Company deleted successfully.',
     historyTitle: 'History',
     historySubtitle: 'Recent extractions saved for this company.',
     historyEmpty: 'There are no saved extractions for this company yet.',
@@ -385,6 +447,27 @@ export const translations: Record<AppLanguage, UiTranslations> = {
     authInvalid: 'Identifiants incorrects.',
     authNoSession: 'Vous devez vous connecter pour extraire des fichiers et voir l’historique.',
     authCurrentCompany: 'Entreprise active',
+    adminTitle: 'Administration',
+    adminSubtitle: 'Gérez les entreprises et mots de passe depuis l’application.',
+    adminPasswordLabel: 'Mot de passe admin',
+    adminPasswordPlaceholder: 'Saisissez le mot de passe maître',
+    adminLoginButton: 'Connexion admin',
+    adminLogoutButton: 'Déconnexion admin',
+    adminDisabled: 'L’accès admin n’est pas encore configuré.',
+    adminCompaniesTitle: 'Entreprises',
+    adminCompanyIdLabel: 'Identifiant',
+    adminCompanyNameLabel: 'Nom de l’entreprise',
+    adminCompanyRegionLabel: 'Région',
+    adminCompanyPasswordLabel: 'Nouveau mot de passe',
+    adminCompanyPasswordPlaceholder:
+      'Remplissez ce champ seulement pour créer ou changer le mot de passe',
+    adminSaveButton: 'Enregistrer',
+    adminDeleteButton: 'Supprimer',
+    adminEditButton: 'Modifier',
+    adminRefreshButton: 'Actualiser',
+    adminEmpty: 'Aucune entreprise gérée pour le moment.',
+    adminSuccessSave: 'Entreprise enregistrée.',
+    adminSuccessDelete: 'Entreprise supprimée.',
     historyTitle: 'Historique',
     historySubtitle: 'Extractions récentes enregistrées pour cette entreprise.',
     historyEmpty: 'Aucune extraction enregistrée pour cette entreprise pour le moment.',
@@ -497,6 +580,26 @@ export const translations: Record<AppLanguage, UiTranslations> = {
     authInvalid: '凭据不正确。',
     authNoSession: '你必须先登录，才能提取文件并查看历史记录。',
     authCurrentCompany: '当前企业',
+    adminTitle: '管理',
+    adminSubtitle: '直接在应用内管理企业和密码。',
+    adminPasswordLabel: '管理员密码',
+    adminPasswordPlaceholder: '输入主密码',
+    adminLoginButton: '管理员登录',
+    adminLogoutButton: '退出管理员',
+    adminDisabled: '管理员访问尚未配置。',
+    adminCompaniesTitle: '企业',
+    adminCompanyIdLabel: '标识',
+    adminCompanyNameLabel: '企业名称',
+    adminCompanyRegionLabel: '区域',
+    adminCompanyPasswordLabel: '新密码',
+    adminCompanyPasswordPlaceholder: '仅在创建或修改密码时填写',
+    adminSaveButton: '保存企业',
+    adminDeleteButton: '删除',
+    adminEditButton: '编辑',
+    adminRefreshButton: '刷新',
+    adminEmpty: '还没有可管理的企业。',
+    adminSuccessSave: '企业已保存。',
+    adminSuccessDelete: '企业已删除。',
     historyTitle: '历史记录',
     historySubtitle: '该企业最近保存的提取记录。',
     historyEmpty: '该企业还没有保存的提取记录。',

@@ -67,6 +67,18 @@ export function ExtractorApp() {
   const [sessionCompany, setSessionCompany] = useState<SessionCompany | null>(null);
   const [companies, setCompanies] = useState<SessionCompany[]>([]);
   const [history, setHistory] = useState<HistoryRecord[]>([]);
+  const [isAdmin, setIsAdmin] = useState(false);
+  const [adminConfigured, setAdminConfigured] = useState(false);
+  const [managedCompanies, setManagedCompanies] = useState<SessionCompany[]>([]);
+  const [adminPassword, setAdminPassword] = useState('');
+  const [adminError, setAdminError] = useState<string | null>(null);
+  const [adminNotice, setAdminNotice] = useState<string | null>(null);
+  const [companyDraft, setCompanyDraft] = useState({
+    id: '',
+    name: '',
+    region: '',
+    password: ''
+  });
   const [companyId, setCompanyId] = useState('');
   const [password, setPassword] = useState('');
   const [authError, setAuthError] = useState<string | null>(null);
@@ -86,6 +98,7 @@ export function ExtractorApp() {
   const [error, setError] = useState<string | null>(null);
   const [logs, setLogs] = useState<string[]>([]);
   const [isPending, startTransition] = useTransition();
+  const [isAdminPending, startAdminTransition] = useTransition();
   const progressTimer = useRef<number | null>(null);
 
   const locale = LANGUAGE_LOCALES[language];
@@ -96,6 +109,17 @@ export function ExtractorApp() {
     setLanguage(storedLanguage);
   }, []);
 
+  async function loadManagedCompanies() {
+    const response = await fetch('/api/admin/companies', { cache: 'no-store' });
+    const payload = (await response.json()) as { companies?: SessionCompany[]; error?: string };
+
+    if (!response.ok) {
+      throw new Error(payload.error || t.requestFailed);
+    }
+
+    setManagedCompanies(payload.companies || []);
+  }
+
   useEffect(() => {
     void (async () => {
       setIsSessionLoading(true);
@@ -104,14 +128,21 @@ export function ExtractorApp() {
         const payload = (await response.json()) as {
           session: SessionCompany | null;
           companies: SessionCompany[];
+          isAdmin: boolean;
+          adminConfigured: boolean;
         };
         setSessionCompany(payload.session);
         setCompanies(payload.companies);
+        setIsAdmin(payload.isAdmin);
+        setAdminConfigured(payload.adminConfigured);
         setCompanyId(payload.session?.id || payload.companies[0]?.id || '');
         if (payload.session) {
           const historyResponse = await fetch('/api/history', { cache: 'no-store' });
           const historyPayload = (await historyResponse.json()) as { records?: HistoryRecord[] };
           setHistory(historyPayload.records || []);
+        }
+        if (payload.isAdmin) {
+          await loadManagedCompanies();
         }
       } finally {
         setIsSessionLoading(false);
@@ -281,6 +312,100 @@ export function ExtractorApp() {
     setSessionCompany(null);
     setHistory([]);
     setPassword('');
+  }
+
+  async function handleAdminLogin() {
+    setAdminError(null);
+    setAdminNotice(null);
+
+    const response = await fetch('/api/admin/login', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify({ password: adminPassword })
+    });
+    const payload = (await response.json()) as { error?: string };
+
+    if (!response.ok) {
+      setAdminError(payload.error || t.authInvalid);
+      return;
+    }
+
+    setIsAdmin(true);
+    setAdminPassword('');
+    await loadManagedCompanies();
+  }
+
+  async function handleAdminLogout() {
+    await fetch('/api/admin/logout', { method: 'POST' });
+    setIsAdmin(false);
+    setManagedCompanies([]);
+    setAdminPassword('');
+    setAdminError(null);
+    setAdminNotice(null);
+  }
+
+  async function handleAdminSaveCompany() {
+    setAdminError(null);
+    setAdminNotice(null);
+
+    startAdminTransition(() => {
+      void (async () => {
+        try {
+          const response = await fetch('/api/admin/companies', {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json'
+            },
+            body: JSON.stringify(companyDraft)
+          });
+          const payload = (await response.json()) as { error?: string };
+
+          if (!response.ok) {
+            throw new Error(payload.error || t.requestFailed);
+          }
+
+          await loadManagedCompanies();
+          setAdminNotice(t.adminSuccessSave);
+          setCompanyDraft({ id: '', name: '', region: '', password: '' });
+        } catch (requestError) {
+          setAdminError(requestError instanceof Error ? requestError.message : t.requestFailed);
+        }
+      })();
+    });
+  }
+
+  async function handleAdminDeleteCompany(id: string) {
+    setAdminError(null);
+    setAdminNotice(null);
+
+    startAdminTransition(() => {
+      void (async () => {
+        try {
+          const response = await fetch('/api/admin/companies', {
+            method: 'DELETE',
+            headers: {
+              'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({ id })
+          });
+          const payload = (await response.json()) as { error?: string };
+
+          if (!response.ok) {
+            throw new Error(payload.error || t.requestFailed);
+          }
+
+          await loadManagedCompanies();
+          setAdminNotice(t.adminSuccessDelete);
+          if (companyDraft.id === id) {
+            setCompanyDraft({ id: '', name: '', region: '', password: '' });
+          }
+        } catch (requestError) {
+          setAdminError(requestError instanceof Error ? requestError.message : t.requestFailed);
+        }
+      })();
+    });
   }
 
   async function handleExtract() {
@@ -529,6 +654,142 @@ export function ExtractorApp() {
                 {authError ? <div className="errorBox">{authError}</div> : null}
                 <button type="button" className="button buttonPrimary" onClick={handleLogin}>
                   {t.authButton}
+                </button>
+              </div>
+            )}
+          </div>
+
+          <div>
+            <h2 className="panelTitle">{t.adminTitle}</h2>
+            <p className="panelSubtitle">{t.adminSubtitle}</p>
+            {!adminConfigured ? (
+              <div className="hint">{t.adminDisabled}</div>
+            ) : isAdmin ? (
+              <div className="stack">
+                <button
+                  type="button"
+                  className="button buttonSecondary"
+                  onClick={() => void loadManagedCompanies()}
+                >
+                  {t.adminRefreshButton}
+                </button>
+                <button type="button" className="button buttonSecondary" onClick={handleAdminLogout}>
+                  {t.adminLogoutButton}
+                </button>
+                <div className="field">
+                  <label htmlFor="adminCompanyId">{t.adminCompanyIdLabel}</label>
+                  <input
+                    id="adminCompanyId"
+                    className="input"
+                    value={companyDraft.id}
+                    onChange={(event) =>
+                      setCompanyDraft((current) => ({ ...current, id: event.target.value }))
+                    }
+                  />
+                </div>
+                <div className="field">
+                  <label htmlFor="adminCompanyName">{t.adminCompanyNameLabel}</label>
+                  <input
+                    id="adminCompanyName"
+                    className="input"
+                    value={companyDraft.name}
+                    onChange={(event) =>
+                      setCompanyDraft((current) => ({ ...current, name: event.target.value }))
+                    }
+                  />
+                </div>
+                <div className="field">
+                  <label htmlFor="adminCompanyRegion">{t.adminCompanyRegionLabel}</label>
+                  <input
+                    id="adminCompanyRegion"
+                    className="input"
+                    value={companyDraft.region}
+                    onChange={(event) =>
+                      setCompanyDraft((current) => ({ ...current, region: event.target.value }))
+                    }
+                  />
+                </div>
+                <div className="field">
+                  <label htmlFor="adminCompanyPassword">{t.adminCompanyPasswordLabel}</label>
+                  <input
+                    id="adminCompanyPassword"
+                    className="input"
+                    type="password"
+                    placeholder={t.adminCompanyPasswordPlaceholder}
+                    value={companyDraft.password}
+                    onChange={(event) =>
+                      setCompanyDraft((current) => ({ ...current, password: event.target.value }))
+                    }
+                  />
+                </div>
+                {adminError ? <div className="errorBox">{adminError}</div> : null}
+                {adminNotice ? <div className="limitBox">{adminNotice}</div> : null}
+                <button
+                  type="button"
+                  className="button buttonPrimary"
+                  disabled={isAdminPending}
+                  onClick={handleAdminSaveCompany}
+                >
+                  {t.adminSaveButton}
+                </button>
+                <div>
+                  <h3 className="panelTitle">{t.adminCompaniesTitle}</h3>
+                  {managedCompanies.length ? (
+                    <div className="fileList">
+                      {managedCompanies.map((company) => (
+                        <article key={company.id} className="fileItem">
+                          <div className="fileRow">
+                            <strong>{company.name}</strong>
+                            <span className="hint">{company.id}</span>
+                          </div>
+                          <span className="hint">{company.region || '-'}</span>
+                          <div className="actions">
+                            <button
+                              type="button"
+                              className="button buttonSecondary"
+                              onClick={() =>
+                                setCompanyDraft({
+                                  id: company.id,
+                                  name: company.name,
+                                  region: company.region || '',
+                                  password: ''
+                                })
+                              }
+                            >
+                              {t.adminEditButton}
+                            </button>
+                            <button
+                              type="button"
+                              className="button buttonSecondary"
+                              onClick={() => handleAdminDeleteCompany(company.id)}
+                            >
+                              {t.adminDeleteButton}
+                            </button>
+                          </div>
+                        </article>
+                      ))}
+                    </div>
+                  ) : (
+                    <div className="emptyState">{t.adminEmpty}</div>
+                  )}
+                </div>
+              </div>
+            ) : (
+              <div className="stack">
+                <div className="field">
+                  <label htmlFor="adminPassword">{t.adminPasswordLabel}</label>
+                  <input
+                    id="adminPassword"
+                    className="input"
+                    type="password"
+                    placeholder={t.adminPasswordPlaceholder}
+                    value={adminPassword}
+                    onChange={(event) => setAdminPassword(event.target.value)}
+                  />
+                </div>
+                {adminError ? <div className="errorBox">{adminError}</div> : null}
+                <button type="button" className="button buttonSecondary" onClick={handleAdminLogin}>
+                  {t.adminLoginButton}
                 </button>
               </div>
             )}

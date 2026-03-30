@@ -3,7 +3,8 @@ import type { CurrencyCode, ExtractSummary, ExtractedLine, ProductType, YearMode
 export interface CompanyAccount {
   id: string;
   name: string;
-  password: string;
+  password?: string;
+  passwordHash?: string;
   region?: string;
 }
 

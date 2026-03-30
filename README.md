@@ -15,6 +15,7 @@ Usa `.env.local`:
 ANTHROPIC_API_KEY=tu_clave
 ANTHROPIC_MODEL=claude-3-5-sonnet-latest
 AUTH_SECRET=una_clave_larga_y_privada
+ADMIN_PASSWORD=una_clave_admin_larga
 CLIENT_ACCOUNTS_JSON=[{"id":"martinez","name":"Martinez Hermanos","password":"supersecreta","region":"España"},{"id":"bata-logistics","name":"Bata Logistics","password":"otra-clave","region":"Guinea Ecuatorial"}]
 BLOB_READ_WRITE_TOKEN=opcional_para_vercel_blob
 ```
@@ -62,6 +63,7 @@ Notas:
 - Procesamiento secuencial en servidor
 - Exportación Excel en tres hojas
 - Acceso por empresa con contraseña
+- Panel admin para gestionar empresas
 - Historial por empresa
 
 ## Endpoints

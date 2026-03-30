@@ -16,7 +16,7 @@ export async function POST(request: Request) {
     );
   }
 
-  const session = authenticateCompany(payload.companyId, payload.password);
+  const session = await authenticateCompany(payload.companyId, payload.password);
   if (!session) {
     return NextResponse.json(
       { error: 'Credenciales incorrectas.' },
