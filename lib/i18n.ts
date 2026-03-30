@@ -116,8 +116,8 @@ export const translations: Record<AppLanguage, UiTranslations> = {
   es: {
     metadataDescription: 'Convierte facturas PDF en Excel con extracción server-side y Claude.',
     languageLabel: 'Idioma',
-    heroEyebrow: 'Extractor.app v1 · Next.js + Claude server-side',
-    heroTitle: 'Facturas PDF a Excel, sin exponer tu API key.',
+    heroEyebrow: 'Extractor.app v1 · Next.js + sever-side',
+    heroTitle: 'Facturas PDF a Excel.',
     heroSubtitle: (maxFiles) =>
       `Sube hasta ${maxFiles} PDFs con texto embebido, elige qué productos quieres extraer y genera un Excel con detalle, resumen por factura y resumen por tipo.`,
     configurationTitle: 'Configuración',
@@ -141,7 +141,7 @@ export const translations: Record<AppLanguage, UiTranslations> = {
     customDescriptionLabel: 'Descripción personalizada',
     customDescriptionPlaceholder: 'Ej: condensadores, compresores y evaporadores industriales',
     uploadTitle: 'Sube tus facturas PDF',
-    uploadHint: 'PDFs con texto embebido o escaneados. Si no hay texto legible, Claude analizará el PDF visualmente.',
+    uploadHint: 'PDFs con texto embebido o escaneados. Si no hay texto legible, Extractor analizará el PDF visualmente.',
     limitsTitle: 'Límites del MVP',
     limitsMaxFiles: (count) => `Hasta ${count} PDFs por envío.`,
     limitsMaxSize: (sizeMb) => `Máximo ${sizeMb} MB por archivo.`,
