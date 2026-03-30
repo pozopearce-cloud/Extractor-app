@@ -22,22 +22,32 @@ async function writeLocalCompanies(records: CompanyAccount[]) {
 }
 
 async function readBlobCompanies(): Promise<CompanyAccount[] | null> {
-  const listing = await list({
-    prefix: 'companies/latest.json',
-    limit: 1
-  });
+  try {
+    const listing = await list({
+      prefix: 'companies/latest.json',
+      limit: 1
+    });
 
-  const blob = listing.blobs[0];
-  if (!blob) {
+    const blob = listing.blobs[0];
+    if (!blob) {
+      return null;
+    }
+
+    const blobUrl = blob.downloadUrl || blob.url;
+    if (!blobUrl) {
+      return null;
+    }
+
+    const response = await fetch(blobUrl, { cache: 'no-store' });
+    if (!response.ok) {
+      return null;
+    }
+
+    return (await response.json()) as CompanyAccount[];
+  } catch (error) {
+    console.error('[companies] Unable to read persisted companies', error);
     return null;
   }
-
-  const response = await fetch(blob.url, { cache: 'no-store' });
-  if (!response.ok) {
-    return null;
-  }
-
-  return (await response.json()) as CompanyAccount[];
 }
 
 async function writeBlobCompanies(records: CompanyAccount[]) {

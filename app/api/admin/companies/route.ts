@@ -36,54 +36,69 @@ function sanitizeCompany(company: {
 }
 
 export async function GET() {
-  if (!(await hasAdminSession())) {
-    return forbidden();
-  }
+  try {
+    if (!(await hasAdminSession())) {
+      return forbidden();
+    }
 
-  const companies = await getCompanyAccounts();
-  return NextResponse.json({
-    companies: companies.map(sanitizeCompany)
-  });
+    const companies = await getCompanyAccounts();
+    return NextResponse.json({
+      companies: companies.map(sanitizeCompany)
+    });
+  } catch (error) {
+    console.error('[admin/companies][GET]', error);
+    return NextResponse.json(
+      { error: 'No se pudo cargar la lista de empresas.' },
+      { status: 500 }
+    );
+  }
 }
 
 export async function POST(request: Request) {
-  if (!(await hasAdminSession())) {
-    return forbidden();
-  }
+  try {
+    if (!(await hasAdminSession())) {
+      return forbidden();
+    }
 
-  const payload = (await request.json().catch(() => null)) as
-    | {
-        id?: string;
-        name?: string;
-        region?: string;
-        password?: string;
-        creditsRemaining?: number;
-        creditUnit?: 'facturas' | 'paginas';
-      }
-    | null;
+    const payload = (await request.json().catch(() => null)) as
+      | {
+          id?: string;
+          name?: string;
+          region?: string;
+          password?: string;
+          creditsRemaining?: number;
+          creditUnit?: 'facturas' | 'paginas';
+        }
+      | null;
 
-  const name = payload?.name?.trim();
-  const id = slugifyCompanyId(payload?.id?.trim() || payload?.name?.trim() || '');
-  const password = payload?.password?.trim();
-  const existing = (await getCompanyAccounts()).find((company) => company.id === id);
+    const name = payload?.name?.trim();
+    const id = slugifyCompanyId(payload?.id?.trim() || payload?.name?.trim() || '');
+    const password = payload?.password?.trim();
+    const existing = (await getCompanyAccounts()).find((company) => company.id === id);
 
-  if (!name) {
-    return NextResponse.json({ error: 'Debes indicar el nombre de la empresa.' }, { status: 400 });
-  }
+    if (!name) {
+      return NextResponse.json(
+        { error: 'Debes indicar el nombre de la empresa.' },
+        { status: 400 }
+      );
+    }
 
-  if (!id) {
-    return NextResponse.json({ error: 'No se pudo generar un identificador válido.' }, { status: 400 });
-  }
+    if (!id) {
+      return NextResponse.json(
+        { error: 'No se pudo generar un identificador válido.' },
+        { status: 400 }
+      );
+    }
 
-  if (!existing && !password) {
-    return NextResponse.json(
-      { error: 'Debes indicar una contraseña para la nueva empresa.' },
-      { status: 400 }
-    );
-  }
+    if (!existing && !password) {
+      return NextResponse.json(
+        { error: 'Debes indicar una contraseña para la nueva empresa.' },
+        { status: 400 }
+      );
+    }
 
-  await upsertCompanyAccount({
-    id,
+    await upsertCompanyAccount({
+      id,
       name,
       region: payload?.region?.trim() || '',
       password: password || undefined,
@@ -92,30 +107,48 @@ export async function POST(request: Request) {
       creditUnit: payload?.creditUnit || undefined
     });
 
-  return NextResponse.json({
-    company: sanitizeCompany({
-      id,
-      name,
-      region: payload?.region?.trim() || '',
-      creditsRemaining:
-        typeof payload?.creditsRemaining === 'number' ? payload.creditsRemaining : 50,
-      creditUnit: payload?.creditUnit || 'facturas'
-    })
-  });
+    return NextResponse.json({
+      company: sanitizeCompany({
+        id,
+        name,
+        region: payload?.region?.trim() || '',
+        creditsRemaining:
+          typeof payload?.creditsRemaining === 'number' ? payload.creditsRemaining : 50,
+        creditUnit: payload?.creditUnit || 'facturas'
+      })
+    });
+  } catch (error) {
+    console.error('[admin/companies][POST]', error);
+    return NextResponse.json(
+      { error: 'No se pudo guardar la empresa.' },
+      { status: 500 }
+    );
+  }
 }
 
 export async function DELETE(request: Request) {
-  if (!(await hasAdminSession())) {
-    return forbidden();
+  try {
+    if (!(await hasAdminSession())) {
+      return forbidden();
+    }
+
+    const payload = (await request.json().catch(() => null)) as { id?: string } | null;
+    const id = payload?.id?.trim();
+
+    if (!id) {
+      return NextResponse.json(
+        { error: 'Debes indicar la empresa a eliminar.' },
+        { status: 400 }
+      );
+    }
+
+    await removeCompanyAccount(id);
+    return NextResponse.json({ ok: true });
+  } catch (error) {
+    console.error('[admin/companies][DELETE]', error);
+    return NextResponse.json(
+      { error: 'No se pudo eliminar la empresa.' },
+      { status: 500 }
+    );
   }
-
-  const payload = (await request.json().catch(() => null)) as { id?: string } | null;
-  const id = payload?.id?.trim();
-
-  if (!id) {
-    return NextResponse.json({ error: 'Debes indicar la empresa a eliminar.' }, { status: 400 });
-  }
-
-  await removeCompanyAccount(id);
-  return NextResponse.json({ ok: true });
 }

@@ -60,6 +60,19 @@ function formatCount(value: number, locale: string) {
   return new Intl.NumberFormat(locale).format(value || 0);
 }
 
+async function readJsonResponse<T>(response: Response): Promise<T | null> {
+  const text = await response.text();
+  if (!text) {
+    return null;
+  }
+
+  try {
+    return JSON.parse(text) as T;
+  } catch {
+    return null;
+  }
+}
+
 export function ExtractorApp() {
   const [language, setLanguage] = useState<AppLanguage>(DEFAULT_LANGUAGE);
   const [currency, setCurrency] = useState<CurrencyCode>(DEFAULT_CURRENCY);
@@ -120,13 +133,13 @@ export function ExtractorApp() {
 
   async function loadManagedCompanies() {
     const response = await fetch('/api/admin/companies', { cache: 'no-store' });
-    const payload = (await response.json()) as { companies?: SessionCompany[]; error?: string };
+    const payload = await readJsonResponse<{ companies?: SessionCompany[]; error?: string }>(response);
 
     if (!response.ok) {
-      throw new Error(payload.error || t.requestFailed);
+      throw new Error(payload?.error || t.requestFailed);
     }
 
-    setManagedCompanies(payload.companies || []);
+    setManagedCompanies(payload?.companies || []);
   }
 
   async function handleAdminRefresh() {
@@ -150,11 +163,16 @@ export function ExtractorApp() {
       setIsSessionLoading(true);
       try {
         const response = await fetch('/api/auth/session', { cache: 'no-store' });
-        const payload = (await response.json()) as {
+        const payload = (await readJsonResponse<{
           session: SessionCompany | null;
           companies: SessionCompany[];
           isAdmin: boolean;
           adminConfigured: boolean;
+        }>(response)) || {
+          session: null,
+          companies: [],
+          isAdmin: false,
+          adminConfigured: false
         };
         setSessionCompany(payload.session);
         setCompanies(payload.companies);
@@ -163,7 +181,8 @@ export function ExtractorApp() {
         setCompanyId(payload.session?.id || payload.companies[0]?.id || '');
         if (payload.session) {
           const historyResponse = await fetch('/api/history', { cache: 'no-store' });
-          const historyPayload = (await historyResponse.json()) as { records?: HistoryRecord[] };
+          const historyPayload =
+            (await readJsonResponse<{ records?: HistoryRecord[] }>(historyResponse)) || {};
           setHistory(historyPayload.records || []);
         }
         if (payload.isAdmin) {
@@ -315,10 +334,10 @@ export function ExtractorApp() {
       })
     });
 
-    const payload = (await response.json()) as {
+    const payload = (await readJsonResponse<{
       session?: SessionCompany;
       error?: string;
-    };
+    }>(response)) || {};
 
     if (!response.ok || !payload.session) {
       setAuthError(payload.error || t.authInvalid);
@@ -328,7 +347,7 @@ export function ExtractorApp() {
     setSessionCompany(payload.session);
     setPassword('');
     const historyResponse = await fetch('/api/history', { cache: 'no-store' });
-    const historyPayload = (await historyResponse.json()) as { records?: HistoryRecord[] };
+    const historyPayload = (await readJsonResponse<{ records?: HistoryRecord[] }>(historyResponse)) || {};
     setHistory(historyPayload.records || []);
   }
 
@@ -350,7 +369,7 @@ export function ExtractorApp() {
       },
       body: JSON.stringify({ password: adminPassword })
     });
-    const payload = (await response.json()) as { error?: string };
+    const payload = (await readJsonResponse<{ error?: string }>(response)) || {};
 
     if (!response.ok) {
       setAdminError(payload.error || t.authInvalid);
@@ -385,7 +404,7 @@ export function ExtractorApp() {
             },
             body: JSON.stringify(companyDraft)
           });
-          const payload = (await response.json()) as { error?: string };
+          const payload = (await readJsonResponse<{ error?: string }>(response)) || {};
 
           if (!response.ok) {
             throw new Error(payload.error || t.requestFailed);
@@ -422,7 +441,7 @@ export function ExtractorApp() {
             },
             body: JSON.stringify({ id })
           });
-          const payload = (await response.json()) as { error?: string };
+          const payload = (await readJsonResponse<{ error?: string }>(response)) || {};
 
           if (!response.ok) {
             throw new Error(payload.error || t.requestFailed);
@@ -497,7 +516,8 @@ export function ExtractorApp() {
             body: formData
           });
 
-          const payload = (await response.json()) as ExtractResponse | { error?: string };
+          const payload =
+            (await readJsonResponse<ExtractResponse | { error?: string }>(response)) || {};
 
           if (!response.ok || !isExtractResponse(payload)) {
             const message =
@@ -525,7 +545,8 @@ export function ExtractorApp() {
           });
           appendLog(t.logCompleted(payload.summary.lineas, selectedFiles.length));
           const historyResponse = await fetch('/api/history', { cache: 'no-store' });
-          const historyPayload = (await historyResponse.json()) as { records?: HistoryRecord[] };
+          const historyPayload =
+            (await readJsonResponse<{ records?: HistoryRecord[] }>(historyResponse)) || {};
           setHistory(historyPayload.records || []);
         } catch (requestError) {
           resetProgressLoop();

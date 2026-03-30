@@ -22,22 +22,32 @@ async function writeLocalHistory(records: HistoryRecord[]) {
 }
 
 async function readBlobHistory(): Promise<HistoryRecord[]> {
-  const listing = await list({
-    prefix: 'history/latest.json',
-    limit: 1
-  });
+  try {
+    const listing = await list({
+      prefix: 'history/latest.json',
+      limit: 1
+    });
 
-  const blob = listing.blobs[0];
-  if (!blob) {
+    const blob = listing.blobs[0];
+    if (!blob) {
+      return [];
+    }
+
+    const blobUrl = blob.downloadUrl || blob.url;
+    if (!blobUrl) {
+      return [];
+    }
+
+    const response = await fetch(blobUrl, { cache: 'no-store' });
+    if (!response.ok) {
+      return [];
+    }
+
+    return (await response.json()) as HistoryRecord[];
+  } catch (error) {
+    console.error('[history] Unable to read persisted history', error);
     return [];
   }
-
-  const response = await fetch(blob.url, { cache: 'no-store' });
-  if (!response.ok) {
-    return [];
-  }
-
-  return (await response.json()) as HistoryRecord[];
 }
 
 async function writeBlobHistory(records: HistoryRecord[]) {
