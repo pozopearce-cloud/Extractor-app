@@ -7,6 +7,7 @@ import {
   upsertCompanyAccount
 } from '@/lib/accounts';
 import { hasAdminSession } from '@/lib/auth';
+import { PersistenceError } from '@/lib/persistence';
 
 export const runtime = 'nodejs';
 export const dynamic = 'force-dynamic';
@@ -119,6 +120,16 @@ export async function POST(request: Request) {
     });
   } catch (error) {
     console.error('[admin/companies][POST]', error);
+    if (error instanceof PersistenceError) {
+      return NextResponse.json(
+        {
+          error:
+            'No se pudieron guardar los cambios porque el almacenamiento persistente del servidor no está disponible.'
+        },
+        { status: 503 }
+      );
+    }
+
     return NextResponse.json(
       { error: 'No se pudo guardar la empresa.' },
       { status: 500 }
@@ -146,6 +157,16 @@ export async function DELETE(request: Request) {
     return NextResponse.json({ ok: true });
   } catch (error) {
     console.error('[admin/companies][DELETE]', error);
+    if (error instanceof PersistenceError) {
+      return NextResponse.json(
+        {
+          error:
+            'No se pudieron guardar los cambios porque el almacenamiento persistente del servidor no está disponible.'
+        },
+        { status: 503 }
+      );
+    }
+
     return NextResponse.json(
       { error: 'No se pudo eliminar la empresa.' },
       { status: 500 }

@@ -3,6 +3,7 @@ import path from 'node:path';
 
 import { list, put } from '@vercel/blob';
 
+import { PersistenceError } from '@/lib/persistence';
 import type { HistoryRecord } from '@/types/history';
 
 const LOCAL_HISTORY_FILE = path.join(process.cwd(), '.tmp-history.json');
@@ -17,8 +18,15 @@ async function readLocalHistory() {
 }
 
 async function writeLocalHistory(records: HistoryRecord[]) {
-  await mkdir(path.dirname(LOCAL_HISTORY_FILE), { recursive: true });
-  await writeFile(LOCAL_HISTORY_FILE, JSON.stringify(records, null, 2), 'utf8');
+  try {
+    await mkdir(path.dirname(LOCAL_HISTORY_FILE), { recursive: true });
+    await writeFile(LOCAL_HISTORY_FILE, JSON.stringify(records, null, 2), 'utf8');
+  } catch (error) {
+    throw new PersistenceError(
+      'No se pudo guardar el historial en el almacenamiento local del servidor.',
+      { cause: error }
+    );
+  }
 }
 
 async function readBlobHistory(): Promise<HistoryRecord[]> {
@@ -51,11 +59,18 @@ async function readBlobHistory(): Promise<HistoryRecord[]> {
 }
 
 async function writeBlobHistory(records: HistoryRecord[]) {
-  await put('history/latest.json', JSON.stringify(records), {
-    access: 'public',
-    addRandomSuffix: false,
-    contentType: 'application/json'
-  });
+  try {
+    await put('history/latest.json', JSON.stringify(records), {
+      access: 'public',
+      addRandomSuffix: false,
+      contentType: 'application/json'
+    });
+  } catch (error) {
+    throw new PersistenceError(
+      'No se pudo guardar el historial en Vercel Blob.',
+      { cause: error }
+    );
+  }
 }
 
 function canUseBlob() {
