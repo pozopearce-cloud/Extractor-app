@@ -105,6 +105,7 @@ type UiTranslations = {
   logDownloaded: (filename: string) => string;
   serverMissingApiKey: string;
   serverRequestInvalid: string;
+  serverPersistenceUnavailable: string;
   serverNoPdf: string;
   serverCustomDescriptionRequired: string;
   serverClaudeConfigInvalid: string;
@@ -137,7 +138,7 @@ export const translations: Record<AppLanguage, UiTranslations> = {
   es: {
     metadataDescription: 'Convierte facturas PDF en Excel con extracción server-side y Claude.',
     languageLabel: 'Idioma',
-    heroEyebrow: 'Extractor.app v1 · Next.js + sever-side',
+    heroEyebrow: 'Extractor.app v1 · Next.js + server-side',
     heroTitle: 'Facturas PDF a Excel.',
     heroSubtitle: (maxFiles) =>
       `Sube hasta ${maxFiles} PDFs con texto embebido, elige qué productos quieres extraer y genera un Excel con detalle, resumen por factura y resumen por tipo.`,
@@ -257,6 +258,8 @@ export const translations: Record<AppLanguage, UiTranslations> = {
     logDownloaded: (filename) => `Excel descargado: ${filename}`,
     serverMissingApiKey: 'La API key de Anthropic no está configurada en el servidor.',
     serverRequestInvalid: 'La solicitud no se pudo procesar.',
+    serverPersistenceUnavailable:
+      'El almacenamiento persistente del servidor no está disponible. Revisa la configuración de Vercel Blob.',
     serverNoPdf: 'Debes subir al menos un PDF.',
     serverCustomDescriptionRequired: 'Debes describir qué productos quieres extraer.',
     serverClaudeConfigInvalid: 'La configuración de Anthropic en el servidor no es válida.',
@@ -391,6 +394,8 @@ export const translations: Record<AppLanguage, UiTranslations> = {
     logDownloaded: (filename) => `Excel downloaded: ${filename}`,
     serverMissingApiKey: 'The Anthropic API key is not configured on the server.',
     serverRequestInvalid: 'The request could not be processed.',
+    serverPersistenceUnavailable:
+      'Persistent server storage is unavailable. Check the Vercel Blob configuration.',
     serverNoPdf: 'You must upload at least one PDF.',
     serverCustomDescriptionRequired: 'You must describe which products to extract.',
     serverClaudeConfigInvalid: 'The Anthropic server configuration is not valid.',
@@ -525,6 +530,8 @@ export const translations: Record<AppLanguage, UiTranslations> = {
     logDownloaded: (filename) => `Excel téléchargé : ${filename}`,
     serverMissingApiKey: 'La clé API Anthropic n’est pas configurée sur le serveur.',
     serverRequestInvalid: 'La requête n’a pas pu être traitée.',
+    serverPersistenceUnavailable:
+      'Le stockage persistant du serveur est indisponible. Vérifiez la configuration de Vercel Blob.',
     serverNoPdf: 'Vous devez téléverser au moins un PDF.',
     serverCustomDescriptionRequired: 'Vous devez décrire les produits à extraire.',
     serverClaudeConfigInvalid: 'La configuration Anthropic côté serveur n’est pas valide.',
@@ -658,6 +665,7 @@ export const translations: Record<AppLanguage, UiTranslations> = {
     logDownloaded: (filename) => `Excel 已下载：${filename}`,
     serverMissingApiKey: '服务器未配置 Anthropic API Key。',
     serverRequestInvalid: '请求无法处理。',
+    serverPersistenceUnavailable: '服务器持久化存储不可用，请检查 Vercel Blob 配置。',
     serverNoPdf: '请至少上传一个 PDF。',
     serverCustomDescriptionRequired: '请说明要提取哪些产品。',
     serverClaudeConfigInvalid: '服务器上的 Anthropic 配置无效。',

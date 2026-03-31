@@ -6,6 +6,7 @@ import { consumeCompanyCredits } from '@/lib/accounts';
 import { getTranslations, normalizeLanguage } from '@/lib/i18n';
 import { appendHistoryRecord } from '@/lib/history-store';
 import { parseClaudeJson, normalizeClaudePayload } from '@/lib/normalize';
+import { PersistenceError } from '@/lib/persistence';
 import {
   extractPdfText,
   getPdfPageCount,
@@ -99,7 +100,25 @@ export async function POST(request: Request) {
       );
     }
 
-    await consumeCompanyCredits(company.id, totalCreditsNeeded);
+    try {
+      await consumeCompanyCredits(company.id, totalCreditsNeeded);
+    } catch (error) {
+      if (error instanceof PersistenceError) {
+        console.error('[extract] credits persistence failed', {
+          companyId: company.id,
+          error: error.message
+        });
+        return NextResponse.json(
+          { error: i18n.serverPersistenceUnavailable },
+          {
+            status: 503,
+            headers: { 'Cache-Control': 'no-store' }
+          }
+        );
+      }
+
+      throw error;
+    }
     const items: ExtractedLine[] = [];
     const files: ExtractResponseFile[] = [];
 
@@ -182,18 +201,29 @@ export async function POST(request: Request) {
       summary: buildSummary(items)
     };
 
-    await appendHistoryRecord({
-      id: crypto.randomUUID(),
-      companyId: company.id,
-      companyName: company.name,
-      createdAt: new Date().toISOString(),
-      productType: input.productType,
-      yearMode: input.yearMode,
-      currency: input.currency,
-      sourceFiles: input.files.map((file) => file.name),
-      summary: payload.summary,
-      items
-    });
+    try {
+      await appendHistoryRecord({
+        id: crypto.randomUUID(),
+        companyId: company.id,
+        companyName: company.name,
+        createdAt: new Date().toISOString(),
+        productType: input.productType,
+        yearMode: input.yearMode,
+        currency: input.currency,
+        sourceFiles: input.files.map((file) => file.name),
+        summary: payload.summary,
+        items
+      });
+    } catch (error) {
+      if (error instanceof PersistenceError) {
+        console.error('[extract] history persistence failed', {
+          companyId: company.id,
+          error: error.message
+        });
+      } else {
+        throw error;
+      }
+    }
 
     return NextResponse.json(payload, {
       headers: {
@@ -205,11 +235,14 @@ export async function POST(request: Request) {
     const message =
       error instanceof ValidationError
         ? error.message
+        : error instanceof PersistenceError
+          ? i18n.serverPersistenceUnavailable
         : error instanceof Error &&
             error.message.includes('ANTHROPIC_API_KEY no está configurada')
           ? i18n.serverMissingApiKey
           : i18n.serverRequestInvalid;
-    const status = error instanceof ValidationError ? 400 : 500;
+    const status =
+      error instanceof ValidationError ? 400 : error instanceof PersistenceError ? 503 : 500;
 
     console.error('[extract] request failed', { error: message });
     return NextResponse.json(
