@@ -63,6 +63,7 @@ async function writeBlobHistory(records: HistoryRecord[]) {
     await put('history/latest.json', JSON.stringify(records), {
       access: 'public',
       addRandomSuffix: false,
+      allowOverwrite: true,
       contentType: 'application/json'
     });
   } catch (error) {
