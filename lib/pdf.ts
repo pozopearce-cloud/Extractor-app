@@ -59,6 +59,8 @@ export async function extractPdfText(
       throw error;
     }
 
+    console.error('[pdf] extractPdfText failed', error);
+
     throw new TypedPdfExtractionError(
       'unreadable',
       messages?.unreadable || 'No se pudo leer el PDF. Verifica que no esté corrupto.'
@@ -80,7 +82,8 @@ export async function getPdfPageCount(
     }).promise;
 
     return Math.min(document.numPages, MAX_PDF_PAGES);
-  } catch {
+  } catch (error) {
+    console.error('[pdf] getPdfPageCount failed', error);
     throw new TypedPdfExtractionError(
       'unreadable',
       messages?.unreadable || 'No se pudo leer el PDF. Verifica que no esté corrupto.'
