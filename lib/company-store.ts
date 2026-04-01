@@ -63,6 +63,7 @@ async function writeBlobCompanies(records: CompanyAccount[]) {
     await put('companies/latest.json', JSON.stringify(records), {
       access: 'public',
       addRandomSuffix: false,
+      allowOverwrite: true,
       contentType: 'application/json'
     });
   } catch (error) {
