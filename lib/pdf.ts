@@ -1,6 +1,16 @@
-import { getDocument } from 'pdfjs-dist/legacy/build/pdf.mjs';
+import { createRequire } from 'node:module';
+
+import { getDocument, GlobalWorkerOptions } from 'pdfjs-dist/legacy/build/pdf.mjs';
 
 import { MAX_PDF_PAGES } from '@/lib/constants';
+
+const require = createRequire(import.meta.url);
+
+try {
+  GlobalWorkerOptions.workerSrc = require.resolve('pdfjs-dist/legacy/build/pdf.worker.mjs');
+} catch (error) {
+  console.error('[pdf] Failed to resolve pdf.worker.mjs', error);
+}
 
 export class PdfExtractionError extends Error {}
 export class TypedPdfExtractionError extends Error {
