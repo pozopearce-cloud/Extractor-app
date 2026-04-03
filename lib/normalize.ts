@@ -38,6 +38,7 @@ function normalizeReference(value: string | undefined) {
 
   if (normalized.endsWith('-')) {
     console.warn('[normalize] suspicious truncated ref_interna', normalized);
+    return '';
   }
 
   return normalized;
