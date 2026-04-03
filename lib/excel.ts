@@ -8,6 +8,10 @@ import { PRODUCT_TYPE_LABELS } from '@/lib/constants';
 import { buildSummary, detectYearFromDate } from '@/lib/summary';
 import type { ExportRequest, ExtractedLine } from '@/types/extractor';
 
+function roundCurrency(value: number) {
+  return Math.round((value + Number.EPSILON) * 100) / 100;
+}
+
 function pickEffectiveYear(items: ExtractedLine[], yearMode: ExportRequest['yearMode']) {
   if (yearMode !== 'auto') {
     return yearMode;
@@ -87,7 +91,7 @@ export async function buildWorkbookBuffer({
       destino: rows[0]?.destino || '',
       lineas: rows.length,
       unidades: rows.reduce((sum, row) => sum + row.cantidad, 0),
-      total: rows.reduce((sum, row) => sum + row.total, 0)
+      total: roundCurrency(rows.reduce((sum, row) => sum + row.total, 0))
     });
   });
 
@@ -118,7 +122,7 @@ export async function buildWorkbookBuffer({
       tipo: type,
       lineas: rows.length,
       unidades: rows.reduce((sum, row) => sum + row.cantidad, 0),
-      total: rows.reduce((sum, row) => sum + row.total, 0)
+      total: roundCurrency(rows.reduce((sum, row) => sum + row.total, 0))
     });
   });
   setCurrencyColumn(summaryByTypeSheet.getColumn('total'), currency);
