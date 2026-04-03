@@ -54,6 +54,8 @@ async function createMessage(
 
     return text;
   } catch (error) {
+    console.error('[anthropic] createMessage failed', error);
+
     if (error instanceof Error) {
       const message = error.message.toLowerCase();
 
