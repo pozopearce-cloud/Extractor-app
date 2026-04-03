@@ -33,6 +33,16 @@ function toNumber(value: string | number | undefined): number {
   return Number.isFinite(parsed) ? parsed : 0;
 }
 
+function normalizeReference(value: string | undefined) {
+  const normalized = (value || '').trim().replace(/\s+/g, ' ');
+
+  if (normalized.endsWith('-')) {
+    console.warn('[normalize] suspicious truncated ref_interna', normalized);
+  }
+
+  return normalized;
+}
+
 export function normalizeClaudePayload(
   payload: unknown,
   fallbackFactura: string,
@@ -49,7 +59,7 @@ export function normalizeClaudePayload(
       factura: parsed.factura || fallbackFactura,
       fecha: parsed.fecha || '',
       destino: parsed.destino || '',
-      ref_interna: parsed.ref_interna || '',
+      ref_interna: normalizeReference(parsed.ref_interna),
       tipo: parsed.tipo || '',
       modelo: parsed.modelo || '',
       cantidad: toNumber(parsed.cantidad),

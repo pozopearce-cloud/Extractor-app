@@ -81,6 +81,7 @@ Instrucciones de extracción:
 - El tipo debe describir la categoría del producto (${config.typeExample(customDescription)}).
 - El modelo es la referencia del fabricante o la referencia comercial del producto.
 - La ref_interna es el código que aparece al inicio de cada línea de producto, si existe.
+- No devuelvas ref_interna parciales o truncadas. Si la referencia visible termina en un guion o parece cortada, devuelve la referencia completa solo si se ve claramente; si no, usa cadena vacía.
 - Si un campo no aparece, usa cadena vacía.
 - Si cantidad, precio_unitario o total no aparecen claramente, usa 0.
 
@@ -128,6 +129,7 @@ Instrucciones de extracción:
 - El tipo debe describir la categoría del producto (${config.typeExample(customDescription)}).
 - El modelo es la referencia del fabricante o la referencia comercial del producto.
 - La ref_interna es el código que aparece al inicio de cada línea de producto, si existe.
+- No devuelvas ref_interna parciales o truncadas. Si la referencia visible termina en un guion o parece cortada, devuelve la referencia completa solo si se ve claramente; si no, usa cadena vacía.
 - Si un campo no aparece, usa cadena vacía.
 - Si cantidad, precio_unitario o total no aparecen claramente, usa 0.
 
